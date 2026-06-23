@@ -1,0 +1,266 @@
+/* 1. BACKGROUND & CONTAINER (Γίνεται transparent για να φαίνεται το styles.css) */
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  font-family: 'Roboto', sans-serif;
+  background: transparent; /* <-- ΕΔΩ ΕΓΙΝΕ Η ΑΛΛΑΓΗ */
+}
+
+.register-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1300px;
+  width: 100%;
+  gap: 60px;
+}
+
+/* 2. ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ (INFO) */
+.info-section {
+  flex: 1;
+  color: white;
+  animation: slideInLeft 1s ease-out forwards;
+}
+
+.info-title {
+  font-size: 64px;
+  margin-bottom: 25px;
+  line-height: 1.15;
+  font-weight: bold;
+}
+
+.highlight {
+  color: #3f51b5;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 5px 15px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.info-subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+/* 3. ΦΟΡΜΑ ΕΓΓΡΑΦΗΣ (CARD) */
+.form-card {
+  width: 100%;
+  max-width: 550px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  animation: fadeInRight 1s ease-out forwards;
+}
+
+.form-title {
+  font-size: 28px;
+  color: #1e1b4b;
+  margin-bottom: 25px;
+  font-weight: bold;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.field-error {
+  font-size: 12px;
+  color: #e91e63;
+  margin-top: -4px;
+  font-weight: 500;
+}
+
+.form-group input, .date-input-wrapper input {
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+  width: 100%;
+}
+
+.form-group input:focus, .date-input-wrapper input:focus {
+  outline: none;
+  border-color: #3f51b5;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(63, 81, 181, 0.1);
+}
+
+/* Datepicker Styling */
+.date-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-toggle {
+  position: absolute;
+  right: 5px;
+  color: #64748b;
+}
+
+/* Password Wrapper */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  padding-right: 50px;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eye-btn:hover {
+  color: #3f51b5;
+}
+
+/* ΚΟΥΜΠΙ ΥΠΟΒΟΛΗΣ */
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #2c387e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(63, 81, 181, 0.4);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ALERTS */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  animation: fadeInAlert 0.3s ease-out forwards;
+}
+
+.alert mat-icon {
+  color: #e91e63;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.alert span {
+  color: #1e1b4b;
+}
+
+.error-alert,
+.success-alert {
+  background: transparent;
+  border: none;
+}
+
+input[type="date"] {
+  font-family: inherit;
+  color: #333;
+}
+
+.date-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Ευθυγράμμιση του εικονιδίου μέσα στο input */
+.date-toggle {
+  position: absolute;
+  right: 8px;
+  color: #64748b;
+}
+
+/* Δίνουμε λίγο "αέρα" στα δεξιά του input για να μην πέφτει το κείμενο πάνω στο εικονίδιο */
+.date-wrapper input {
+  padding-right: 40px !important;
+}
+
+.form-footer { text-align: center; margin-top: 20px; color: #666; }
+.form-footer a { color: #3f51b5; font-weight: bold; text-decoration: none; }
+
+.required-note { font-size: 12px; color: #777; text-align: left; margin-bottom: 15px; font-style: italic; }
+
+/* ANIMATIONS */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInAlert {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

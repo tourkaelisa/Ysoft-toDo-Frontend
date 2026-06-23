@@ -1,0 +1,335 @@
+<div class="users-page-wrapper">
+  
+  <div class="users-header-container">
+    <div class="users-header">
+      <h2><mat-icon>people_outline</mat-icon> Διαχείριση Χρηστών</h2>
+      <p>Επισκόπηση και διαχείριση όλων των εγγεγραμμένων χρηστών της πλατφόρμας.</p>
+    </div>
+    
+    <button class="add-btn" (click)="openModal()">
+      <mat-icon>person_add</mat-icon> Νέος Χρήστης
+    </button>
+  </div>
+
+  <div class="toolbar-container">
+    
+    <div class="main-search-bar">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="searchUsers()" placeholder="Αναζήτηση...">
+      <button *ngIf="searchQuery" class="clear-search-btn" (click)="clearSearch()" title="Καθαρισμός">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="filter-wrapper">
+      <button class="filter-toggle-btn" (click)="toggleFilters()" [class.active]="isFilterOpen || filterStartDate || filterEndDate">
+        <mat-icon>tune</mat-icon>
+        <span>Φίλτρα</span>
+      </button>
+
+      <div class="filter-dropdown" *ngIf="isFilterOpen">
+        <div class="filter-dropdown-header">
+          <h4>Ημερομηνία Γέννησης</h4>
+        </div>
+        
+        <div class="filter-dropdown-body">
+          <div class="form-group filter-field">
+            <label>Από</label>
+            <div class="date-wrapper">
+              <input matInput [matDatepicker]="startPicker" [(ngModel)]="filterStartDate" placeholder="Επιλογή..." (focus)="startPicker.open()">
+              <mat-datepicker-toggle matSuffix [for]="startPicker" class="date-toggle"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </div>
+          </div>
+
+          <div class="form-group filter-field">
+            <label>Έως</label>
+            <div class="date-wrapper">
+              <input matInput [matDatepicker]="endPicker" [(ngModel)]="filterEndDate" placeholder="Επιλογή..." (focus)="endPicker.open()">
+              <mat-datepicker-toggle matSuffix [for]="endPicker" class="date-toggle"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="filterError" class="filter-error-msg">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ filterError }}</span>
+        </div>
+
+        <div class="filter-dropdown-actions">
+          <button class="cancel-btn clear-btn-small" (click)="clearFilters()">Καθαρισμός</button>
+          <button class="submit-btn save-btn-custom apply-btn-small" (click)="filterUsers()">Εφαρμογή</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Φίλτρο ρόλου -->
+    <div class="role-filter">
+      <button class="role-filter-btn" [class.active]="activeRoleFilter === 'all'" (click)="setRoleFilter('all')">
+        Όλοι
+      </button>
+      <button class="role-filter-btn" [class.active]="activeRoleFilter === 'admin'" (click)="setRoleFilter('admin')">
+        <mat-icon>admin_panel_settings</mat-icon> Διαχειριστές
+      </button>
+      <button class="role-filter-btn" [class.active]="activeRoleFilter === 'user'" (click)="setRoleFilter('user')">
+        <mat-icon>person</mat-icon> Χρήστες
+      </button>
+    </div>
+
+  </div>
+
+  <div *ngIf="errorMessage()" class="error-banner">
+    <mat-icon>error_outline</mat-icon> {{ errorMessage() }}
+  </div>
+
+  <div class="users-grid" *ngIf="users().length > 0">
+    <div *ngFor="let user of users()" class="user-card" (click)="openTasksModal(user)">
+      <div class="user-info">
+        <div class="avatar">
+          {{ user.first_name ? user.first_name[0] : '-' }}{{ user.last_name ? user.last_name[0] : '' }}
+        </div>
+        <div class="user-text">
+          <h3>
+            <span class="user-name" [title]="user.first_name + ' ' + user.last_name">{{ user.first_name }} {{ user.last_name }}</span>
+            <span class="user-id">ID: #{{ user.id }}</span>
+          </h3>
+          <p class="user-email" [title]="user.email">{{ user.email }}</p>
+        </div>
+      </div>
+
+      <div class="card-actions-wrapper">
+        <button class="role-badge" [class.admin]="user.role_name === 'admin'"
+                (click)="toggleUserRole(user, $event)"
+                [title]="user.role_name === 'admin' ? 'Κάντε κλικ για υποβιβασμό σε User' : 'Κάντε κλικ για προαγωγή σε Admin'">
+          <mat-icon>{{ user.role_name === 'admin' ? 'admin_panel_settings' : 'person' }}</mat-icon>
+          {{ user.role_name === 'admin' ? 'Admin' : 'User' }}
+        </button>
+        <div class="card-actions">
+          <button class="icon-btn edit-btn" (click)="$event.stopPropagation(); openModal(user)" title="Επεξεργασία">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button class="icon-btn delete-btn" (click)="$event.stopPropagation(); openDeleteConfirm(user.id)" title="Διαγραφή">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="isModalOpen">
+    <div class="modal-box form-card">
+      <h2 class="form-title">{{ editingUserId ? 'Επεξεργασία Χρήστη' : 'Προσθήκη Χρήστη' }}</h2>
+      
+      <div class="form-group">
+        <label>Όνομα <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="formData.first_name" placeholder="Π.χ. Γιάννης" (keyup.enter)="saveUser()">
+      </div>
+      
+      <div class="form-group">
+        <label>Επώνυμο <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="formData.last_name" placeholder="Π.χ. Παπαδόπουλος" (keyup.enter)="saveUser()">
+      </div>
+
+      <div class="form-group">
+        <label>Email <span class="required">*</span></label>
+        <input type="email" [(ngModel)]="formData.email" placeholder="name@example.com" (keyup.enter)="saveUser()">
+      </div>
+
+      <div class="form-group">
+        <label>Ημ. Γέννησης</label>
+        <div class="date-wrapper">
+          <input matInput [matDatepicker]="picker" name="birth_date" [(ngModel)]="formData.birth_date" placeholder="ΗΗ/ΜΜ/ΕΕΕΕ" (focus)="picker.open()">
+          <mat-datepicker-toggle matSuffix [for]="picker" class="date-toggle"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Κωδικός <span *ngIf="!editingUserId" class="required">*</span> <span style="font-size: 11px; font-weight: normal; color: #64748b;" *ngIf="editingUserId">(Αφήστε κενό για να μην αλλάξει)</span></label>
+        <div class="password-wrapper">
+          <input [type]="isPasswordVisible ? 'text' : 'password'" [(ngModel)]="formData.password" placeholder="Πληκτρολογήστε κωδικό..." (keyup.enter)="saveUser()">
+          <button type="button" class="eye-btn" (click)="isPasswordVisible = !isPasswordVisible">
+            <mat-icon>{{ isPasswordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ρόλος <span class="required">*</span></label>
+        <div class="custom-dropdown" [class.open]="isRoleDropdownOpen">
+          <button type="button" class="dropdown-trigger" (click)="toggleRoleDropdown()">
+            <span class="dropdown-value">
+              <mat-icon class="role-icon">{{ selectedRole.icon }}</mat-icon>
+              {{ selectedRole.label }}
+            </span>
+            <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+          </button>
+
+          <div class="dropdown-menu" *ngIf="isRoleDropdownOpen">
+            <button
+              type="button"
+              *ngFor="let opt of roleOptions"
+              class="dropdown-option"
+              [class.selected]="formData.role_name === opt.value"
+              (click)="selectRole(opt.value)">
+              <mat-icon class="role-icon">{{ opt.icon }}</mat-icon>
+              <span>{{ opt.label }}</span>
+              <mat-icon class="check-icon" *ngIf="formData.role_name === opt.value">check</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="required-note">
+        <span class="required">*</span> Υποχρεωτικά πεδία
+      </div>
+
+      <div *ngIf="formError()" class="form-error-alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ formError() }}</span>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeModal()">Ακύρωση</button>
+        <button class="submit-btn save-btn-custom" (click)="saveUser()">Αποθήκευση</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="isTasksModalOpen" (click)="closeTasksModal()">
+    <div class="modal-box tasks-modal" (click)="$event.stopPropagation()">
+
+      <div class="tasks-modal-header">
+        <h2>Tasks: {{ selectedUserForTasks?.first_name }} {{ selectedUserForTasks?.last_name }}</h2>
+        <button class="close-icon-btn" (click)="closeTasksModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="tasks-modal-body">
+        
+        <div *ngIf="userTasks().length === 0" class="no-tasks-msg">
+          <mat-icon>inbox</mat-icon>
+          <p>Ο χρήστης δεν έχει δημιουργήσει κανένα task ακόμα.</p>
+        </div>
+
+        <div *ngFor="let task of userTasks()" class="task-list-card">
+          <div class="task-list-header">
+            <h3>{{ task.title }}</h3>
+            <span class="status-badge" [class.completed]="task.status === 'completed'">
+              {{ task.status === 'completed' ? 'Ολοκληρωμένο' : 'Εκκρεμεί' }}
+            </span>
+          </div>
+
+          <ul class="task-items-list" *ngIf="task.items && task.items.length > 0">
+            <li *ngFor="let item of task.items">
+              <mat-icon class="bullet-icon">subdirectory_arrow_right</mat-icon>
+              {{ item.description }}
+            </li>
+          </ul>
+          
+          <div class="no-items-msg" *ngIf="!task.items || task.items.length === 0">
+            Δεν υπάρχουν υπο-εργασίες.
+          </div>
+
+          <!-- Συνημμένα αρχεία του task (read-only για τον admin: μόνο λήψη) -->
+          <div class="task-files-section" *ngIf="task.files && task.files.length > 0">
+            <div class="task-files-title">
+              <mat-icon>attach_file</mat-icon>
+              <span>Συνημμένα αρχεία</span>
+              <span class="files-count-badge">{{ task.files.length }}</span>
+            </div>
+            <ul class="task-files-list">
+              <li *ngFor="let file of task.files" class="task-file-row" (click)="downloadFile(file, $event)" title="Λήψη αρχείου">
+                <mat-icon class="file-type-icon">{{ getFileIcon(file.mime_type) }}</mat-icon>
+                <div class="task-file-info">
+                  <span class="task-file-name">{{ file.original_name }}</span>
+                  <span class="task-file-size">{{ formatFileSize(file.size) }}</span>
+                </div>
+                <button type="button" class="file-download-btn" (click)="downloadFile(file, $event)" title="Λήψη">
+                  <mat-icon>download</mat-icon>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- INFO / ALERT MODAL -->
+<div class="modal-overlay" *ngIf="isInfoModalOpen" (click)="closeInfo()">
+  <div class="modal-box info-modal-box" (click)="$event.stopPropagation()">
+    <div class="info-modal-icon">
+      <mat-icon>info</mat-icon>
+    </div>
+    <p class="info-modal-message">{{ infoMessage }}</p>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="submit-btn save-btn-custom" (click)="closeInfo()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="modal-overlay" *ngIf="isDeleteConfirmOpen" (click)="closeDeleteConfirm()">
+  <div class="modal-box del-confirm-box" (click)="$event.stopPropagation()">
+    <div class="del-confirm-header">
+      <div class="del-confirm-icon-wrap">
+        <mat-icon>warning_amber</mat-icon>
+      </div>
+      <h3 class="del-confirm-title">{{ isDeletingSelf ? 'Διαγραφή του λογαριασμού σας' : 'Επιβεβαίωση Διαγραφής' }}</h3>
+    </div>
+    <p class="del-confirm-body" *ngIf="!isDeletingSelf">Είστε σίγουροι ότι θέλετε να διαγράψετε αυτόν τον χρήστη; Η ενέργεια αυτή δεν αναιρείται.</p>
+    <p class="del-confirm-body" *ngIf="isDeletingSelf">
+      Προσοχή! Αυτός ο λογαριασμός είναι <strong>δικός σας</strong>. Αν συνεχίσετε, ο λογαριασμός σας θα
+      διαγραφεί <strong>οριστικά</strong>. Είστε σίγουροι;
+    </p>
+    <div class="del-confirm-footer">
+      <button class="cancel-btn" (click)="closeDeleteConfirm()">Ακύρωση</button>
+      <button class="del-confirm-btn" (click)="confirmDeleteUser()">Διαγραφή</button>
+    </div>
+  </div>
+</div>
+<!-- ROLE CHANGE WARNING MODAL (όταν ο admin αλλάζει τον ΔΙΚΟ του ρόλο σε user) -->
+<div class="modal-overlay" *ngIf="isRoleWarningOpen" (click)="cancelRoleChange()">
+  <div class="modal-box del-confirm-box" (click)="$event.stopPropagation()">
+    <div class="del-confirm-header">
+      <div class="del-confirm-icon-wrap">
+        <mat-icon>warning_amber</mat-icon>
+      </div>
+      <h3 class="del-confirm-title">Αλλαγή του δικού σας ρόλου</h3>
+    </div>
+    <p class="del-confirm-body">
+      Πρόκειται να αλλάξετε τον ρόλο σας από <strong>Admin</strong> σε <strong>User</strong>.
+      Αν συνεχίσετε, θα <strong>χάσετε τα δικαιώματα</strong> διαχειριστή.
+    </p>
+    <div class="del-confirm-footer">
+      <button class="cancel-btn" (click)="cancelRoleChange()">Ακύρωση</button>
+      <button class="del-confirm-btn" (click)="confirmRoleChange()">Ναι, συνέχεια</button>
+    </div>
+  </div>
+</div>
+
+<!-- SELF-DEMOTE WARNING MODAL (γρήγορο toggle του ΔΙΚΟΥ μου ρόλου admin -> user) -->
+<div class="modal-overlay" *ngIf="isSelfDemoteOpen" (click)="cancelSelfDemote()">
+  <div class="modal-box del-confirm-box" (click)="$event.stopPropagation()">
+    <div class="del-confirm-header">
+      <div class="del-confirm-icon-wrap">
+        <mat-icon>warning_amber</mat-icon>
+      </div>
+      <h3 class="del-confirm-title">Αλλαγή του δικού σας ρόλου</h3>
+    </div>
+    <p class="del-confirm-body">
+      Πρόκειται να αλλάξετε τον ρόλο σας από <strong>Admin</strong> σε <strong>User</strong>. Αν συνεχίσετε, θα
+      <strong>χάσετε τα δικαιώματα</strong> διαχειριστή.
+    <div class="del-confirm-footer">
+      <button class="cancel-btn" (click)="cancelSelfDemote()">Ακύρωση</button>
+      <button class="del-confirm-btn" (click)="confirmSelfDemote()">Ναι, συνέχεια</button>
+    </div>
+  </div>
+</div>

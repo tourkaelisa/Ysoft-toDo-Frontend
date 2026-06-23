@@ -1,0 +1,196 @@
+<div class="tasks-page-wrapper">
+
+  <div class="tasks-main-header">
+    <h2><mat-icon>assignment</mat-icon> Οι Εργασίες Μου</h2>
+    <p>Οργανώστε τις καθημερινές σας εργασίες και παρακολουθήστε την πρόοδό τους σε πραγματικό χρόνο.</p>
+  </div>
+
+  <div *ngIf="errorMessage()" class="tasks-error-alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+
+  <!-- ΚΥΡΙΟ LAYOUT: ΛΙΣΤΑ ΑΡΙΣΤΕΡΑ + SIDE PANEL ΔΕΞΙΑ -->
+  <div class="tasks-split-layout" [class.has-selection]="selectedTask()">
+
+    <!-- ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ: ΣΥΜΠΑΓΗΣ ΛΙΣΤΑ -->
+    <div class="tasks-list-column">
+
+      <form (ngSubmit)="addTask()" class="main-task-form-card">
+        <div class="input-with-icon">
+          <mat-icon class="input-left-icon">add_task</mat-icon>
+          <input type="text" name="newTask" [(ngModel)]="newTaskTitle" placeholder="Προσθήκη νέας εργασίας..." required>
+        </div>
+        <button type="submit" class="primary-task-btn" [disabled]="!newTaskTitle.trim()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </form>
+
+      <div *ngIf="tasks().length === 0" class="empty-tasks-state-card">
+        <mat-icon>task_alt</mat-icon>
+        <p>Όλα έτοιμα! Δεν υπάρχουν καταχωρημένες εργασίες.</p>
+      </div>
+
+      <ul class="tasks-compact-list" *ngIf="tasks().length > 0">
+        <li *ngFor="let task of tasks()"
+            class="compact-task-row"
+            [class.completed-task]="task.status === 'completed'"
+            [class.active-task]="selectedTask()?.id === task.id"
+            (click)="selectTask(task)">
+
+          <label class="custom-checkbox-container" (click)="$event.stopPropagation()">
+            <input type="checkbox" [checked]="task.status === 'completed'" (change)="toggleStatus(task, $event)">
+            <span class="checkbox-checkmark"></span>
+          </label>
+
+          <span class="compact-task-title">{{ task.title }}</span>
+
+          <span class="compact-task-meta" *ngIf="task.items && task.items.length > 0">
+            <mat-icon>format_list_bulleted</mat-icon>
+            {{ task.items.length }}
+          </span>
+
+          <mat-icon class="compact-chevron">chevron_right</mat-icon>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ΔΕΞΙΑ ΣΤΗΛΗ: SIDE PANEL ΛΕΠΤΟΜΕΡΕΙΩΝ -->
+    <aside class="task-detail-panel" *ngIf="selectedTask() as task">
+
+      <div class="detail-panel-header">
+        <div class="detail-header-left">
+          <label class="custom-checkbox-container detail-checkbox">
+            <input type="checkbox" [checked]="task.status === 'completed'" (change)="toggleStatus(task)">
+            <span class="checkbox-checkmark"></span>
+          </label>
+          <div class="detail-header-text">
+            <span class="detail-status-label" [class.completed]="task.status === 'completed'">
+              {{ task.status === 'completed' ? 'Ολοκληρωμένη' : 'Σε εκκρεμότητα' }}
+            </span>
+            <h3 [class.completed-title]="task.status === 'completed'">{{ task.title }}</h3>
+          </div>
+        </div>
+        <button type="button" class="detail-close-btn" (click)="closeSidePanel()" title="Κλείσιμο">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="detail-panel-actions">
+        <button type="button" class="detail-action-btn" (click)="editTask(task)">
+          <mat-icon>edit</mat-icon> Επεξεργασία
+        </button>
+        <button type="button" class="detail-action-btn detail-delete" (click)="openDeleteModal(task, 'task')">
+          <mat-icon>delete</mat-icon> Διαγραφή
+        </button>
+      </div>
+
+      <div class="detail-panel-section">
+        <div class="detail-section-title">
+          <mat-icon>checklist</mat-icon>
+          <span>Υπο-εργασίες</span>
+          <span class="detail-count-badge" *ngIf="task.items && task.items.length > 0">{{ task.items.length }}</span>
+        </div>
+
+        <ul class="subtasks-list">
+          <li *ngIf="!task.items || task.items.length === 0" class="empty-subtasks">
+            <mat-icon>info_outline</mat-icon> Δεν υπάρχουν υπο-εργασίες ακόμα.
+          </li>
+          <li *ngFor="let item of task.items" class="subtask-item-row">
+            <div class="subtask-content">
+              <mat-icon class="subtask-arrow">subdirectory_arrow_right</mat-icon>
+              <span class="subtask-text">{{ item.description }}</span>
+            </div>
+            <div class="subtask-actions">
+              <button type="button" class="sub-action-btn" (click)="editTaskItem(item, task)"><mat-icon>edit</mat-icon></button>
+              <button type="button" class="sub-action-btn sub-delete" (click)="openDeleteModal(item, 'subtask', task)"><mat-icon>delete</mat-icon></button>
+            </div>
+          </li>
+        </ul>
+
+        <div class="add-subtask-form">
+          <input type="text" [(ngModel)]="task.newItemDescription" placeholder="Νέα υπο-εργασία..." (keydown.enter)="addTaskItem(task)">
+          <button type="button" class="secondary-task-btn" (click)="addTaskItem(task)" [disabled]="!task.newItemDescription?.trim()">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION ΑΡΧΕΙΩΝ -->
+      <div class="detail-panel-section files-section">
+        <div class="detail-section-title">
+          <mat-icon>attach_file</mat-icon>
+          <span>Αρχεία</span>
+          <span class="detail-count-badge" *ngIf="task.files && task.files.length > 0">{{ task.files.length }}</span>
+        </div>
+
+        <ul class="files-list">
+          <li *ngIf="!task.files || task.files.length === 0" class="empty-subtasks">
+            <mat-icon>info_outline</mat-icon> Δεν υπάρχουν συνημμένα αρχεία ακόμα.
+          </li>
+          <li *ngFor="let file of task.files" class="file-item-row">
+            <div class="file-content" (click)="downloadFile(file)" title="Λήψη αρχείου">
+              <mat-icon class="file-type-icon">{{ getFileIcon(file.mime_type) }}</mat-icon>
+              <div class="file-info">
+                <span class="file-name">{{ file.original_name }}</span>
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              </div>
+            </div>
+            <div class="file-actions">
+              <button type="button" class="sub-action-btn" (click)="downloadFile(file)" title="Λήψη"><mat-icon>download</mat-icon></button>
+              <button type="button" class="sub-action-btn sub-delete" (click)="openDeleteModal(file, 'file', task)" title="Διαγραφή"><mat-icon>delete</mat-icon></button>
+            </div>
+          </li>
+        </ul>
+
+        <!-- Κρυφό input αρχείου που ενεργοποιείται από το κουμπί -->
+        <input type="file" #fileInput hidden (change)="uploadFile(task, $event)">
+        <button type="button" class="upload-file-btn" (click)="fileInput.click()" [disabled]="task.uploading">
+          <mat-icon>{{ task.uploading ? 'hourglass_top' : 'upload_file' }}</mat-icon>
+          {{ task.uploading ? 'Ανέβασμα...' : 'Προσθήκη αρχείου' }}
+        </button>
+      </div>
+    </aside>
+
+    <!-- PLACEHOLDER ΟΤΑΝ ΔΕΝ ΕΧΕΙ ΕΠΙΛΕΓΕΙ ΤΙΠΟΤΑ -->
+    <aside class="task-detail-panel detail-placeholder" *ngIf="!selectedTask() && tasks().length > 0">
+      <mat-icon>touch_app</mat-icon>
+      <h3>Επιλέξτε μια εργασία</h3>
+      <p>Πατήστε σε μια εργασία από τη λίστα για να δείτε τις λεπτομέρειες και τις υπο-εργασίες της.</p>
+    </aside>
+
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="isEditModalOpen" (click)="closeEditModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><mat-icon>edit_note</mat-icon> Επεξεργασία {{ editTarget === 'task' ? 'Εργασίας' : 'Υπο-εργασίας' }}</h3>
+      <button class="close-modal-btn" (click)="closeEditModal()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <input type="text" [(ngModel)]="editTitle" class="modal-input" placeholder="Νέος τίτλος..." (input)="editError.set('')" (keyup.enter)="saveEdit()">
+      <div *ngIf="editError()" class="alert error-alert modal-error-alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ editError() }}</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel-btn" (click)="closeEditModal()">Ακύρωση</button>
+      <button class="modal-save-btn" (click)="saveEdit()"><mat-icon>save</mat-icon> Αποθήκευση</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="isDeleteModalOpen" (click)="closeDeleteModal()">
+  <div class="modal-card delete-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 style="color: #e91e63;"><mat-icon>warning_amber</mat-icon> Επιβεβαίωση Διαγραφής</h3>
+    </div>
+    <p style="color: #475569; margin-bottom: 25px;">Είσαι σίγουρος ότι θέλεις να διαγράψεις {{ deleteTarget === 'task' ? 'αυτή την εργασία' : deleteTarget === 'subtask' ? 'αυτή την υπο-εργασία' : 'αυτό το αρχείο' }}; Η ενέργεια αυτή δεν αναιρείται.</p>
+    <div class="modal-footer">
+      <button class="modal-cancel-btn" (click)="closeDeleteModal()">Ακύρωση</button>
+      <button class="modal-delete-btn" (click)="confirmDelete()">Διαγραφή</button>
+    </div>
+  </div>
+</div>

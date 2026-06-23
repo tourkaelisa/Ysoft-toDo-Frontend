@@ -1,0 +1,109 @@
+/* ΣΚΕΛΕΤΟΣ ΕΦΑΡΜΟΓΗΣ */
+.app-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* ---------------------------------
+   ΣΤΥΛ ΓΙΑ ΤΟ SIDEBAR (ΑΡΙΣΤΕΡΑ)
+   --------------------------------- */
+.sidebar {
+  width: 270px;
+  background-color: #1e1b4b; /* Σκούρο, premium μπλε */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.sidebar-header {
+  padding: 30px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo-circle {
+  background: linear-gradient(135deg, #ec4899, #be185d); /* Ροζ πινελιά από το Login σου */
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-circle mat-icon { color: white; }
+.sidebar-header h2 { font-size: 22px; font-weight: bold; margin: 0; letter-spacing: 0.5px; }
+
+/* Πλοήγηση (Τα Links) */
+.sidebar-nav {
+  flex: 1;
+  padding: 25px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  color: #94a3b8; /* Απαλό γκρι */
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+/* Το στυλ όταν το Link είναι ενεργό (πατημένο) */
+.active-link {
+  background-color: #3f51b5 !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(63, 81, 181, 0.4);
+}
+
+/* Κουμπί Αποσύνδεσης */
+.sidebar-footer {
+  padding: 20px 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  color: #ef4444; /* Απαλό κόκκινο */
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.logout-btn:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+/* ---------------------------------
+   ΚΥΡΙΩΣ ΠΕΡΙΕΧΟΜΕΝΟ (ΔΕΞΙΑ)
+   --------------------------------- */
+.main-content {
+  flex: 1; 
+  overflow-y: auto; 
+  height: 100vh;
+  background: transparent; 
+}

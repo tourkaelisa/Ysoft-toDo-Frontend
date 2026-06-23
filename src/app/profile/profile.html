@@ -1,0 +1,156 @@
+<div class="profile-container">
+
+  <div class="profile-card">
+
+    <div class="profile-header">
+      <div class="avatar-circle">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+      <h2>Το Προφίλ Μου</h2>
+    </div>
+
+    <form #profileForm="ngForm" (ngSubmit)="onUpdateProfile()">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label><mat-icon>badge</mat-icon> Όνομα <span class="required-star">*</span></label>
+          <input type="text" name="first_name" [(ngModel)]="user.first_name" placeholder="Όνομα..." required>
+        </div>
+        <div class="form-group">
+          <label><mat-icon>badge</mat-icon> Επώνυμο <span class="required-star">*</span></label>
+          <input type="text" name="last_name" [(ngModel)]="user.last_name" placeholder="Επώνυμο..." required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label><mat-icon>email</mat-icon> Email <span class="required-star">*</span></label>
+          <input type="email" name="email" [(ngModel)]="user.email" placeholder="Email..." required>
+        </div>
+
+        <div class="form-group">
+        <label><mat-icon>cake</mat-icon> Ημ. Γέννησης</label>
+          <div class="date-wrapper">
+            <input
+              matInput
+              [matDatepicker]="picker"
+              name="birth_date"
+              [(ngModel)]="user.birth_date"
+              placeholder="ΗΗ/ΜΜ/ΕΕΕΕ"
+              (focus)="picker.open()">
+            <mat-datepicker-toggle matSuffix [for]="picker" class="date-toggle"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="password-change-title">
+        <h3><mat-icon>vpn_key</mat-icon> Αλλαγή Κωδικού Πρόσβασης (Προαιρετικό)</h3>
+        <p class="field-hint">Συμπληρώστε τα παρακάτω πεδία μόνο αν επιθυμείτε να αλλάξετε τον κωδικό σας.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Νέος Κωδικός Πρόσβασης</label>
+          <input type="password" name="new_password" [(ngModel)]="newPassword" placeholder="Πληκτρολογήστε νέο κωδικό...">
+        </div>
+        <div class="form-group">
+          <label>Επιβεβαίωση Νέου Κωδικού</label>
+          <input type="password" name="confirm_new_password" [(ngModel)]="confirmNewPassword" placeholder="Ξαναγράψτε τον νέο κωδικό...">
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-group password-section">
+        <label><mat-icon>lock</mat-icon> Επιβεβαίωση Τρέχοντος Κωδικού <span class="required-star">*</span></label>
+        <p class="field-hint">Για να αποθηκευτούν οποιεσδήποτε αλλαγές, πληκτρολογήστε τον τρέχοντα κωδικό σας.</p>
+        <div class="password-wrapper">
+          <input [type]="isPasswordVisible ? 'text' : 'password'" name="confirm_password" [(ngModel)]="confirmPassword" placeholder="Πληκτρολογήστε τον τρέχοντα κωδικό σας..." required>
+          <button type="button" class="eye-btn" (click)="isPasswordVisible = !isPasswordVisible">
+            <mat-icon>{{ isPasswordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="message-container">
+        <div *ngIf="errorMessage()" class="alert error-alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
+
+        <div *ngIf="successMessage()" class="alert success-alert">
+          <mat-icon>check_circle_outline</mat-icon>
+          <span>{{ successMessage() }}</span>
+        </div>
+      </div>
+
+      <div class="required-note">
+        <span class="required-star">*</span> Υποχρεωτικά πεδία
+      </div>
+
+      <button type="submit" class="save-btn" [disabled]="profileForm.invalid" style="margin-top: 20px;">
+        <mat-icon>save</mat-icon> Αποθήκευση Αλλαγών
+      </button>
+
+    </form>
+
+    <!-- ΔΙΑΚΡΙΤΙΚΟΣ ΣΥΝΔΕΣΜΟΣ ΔΙΑΓΡΑΦΗΣ -->
+    <div class="delete-link-wrapper">
+      <button type="button" class="delete-link" (click)="openDeleteModal()">
+        <mat-icon>delete_outline</mat-icon> Διαγραφή λογαριασμού
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- MODAL ΕΠΙΒΕΒΑΙΩΣΗΣ ΔΙΑΓΡΑΦΗΣ -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <div class="modal-icon">
+      <mat-icon>error_outline</mat-icon>
+    </div>
+
+    <h3 class="modal-title">Είστε σίγουρος;</h3>
+    <p class="modal-text">
+      Πρόκειται να διαγράψετε <strong>οριστικά</strong> τον λογαριασμό σας.
+      Όλα τα δεδομένα σας θα χαθούν και η ενέργεια <strong>δεν αναιρείται</strong>.
+    </p>
+
+    <div class="form-group">
+      <label><mat-icon>lock</mat-icon> Επιβεβαιώστε με τον κωδικό σας</label>
+      <div class="password-wrapper">
+        <input
+          [type]="isDeletePasswordVisible ? 'text' : 'password'"
+          name="delete_password"
+          [(ngModel)]="deletePassword"
+          placeholder="Πληκτρολογήστε τον κωδικό σας..."
+          (keyup.enter)="onConfirmDelete()">
+        <button type="button" class="eye-btn" (click)="isDeletePasswordVisible = !isDeletePasswordVisible">
+          <mat-icon>{{ isDeletePasswordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="alert error-alert" *ngIf="deleteError()">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ deleteError() }}</span>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="modal-cancel-btn" (click)="closeDeleteModal()" [disabled]="isDeleting">
+        Ακύρωση
+      </button>
+      <button type="button" class="modal-confirm-btn" (click)="onConfirmDelete()" [disabled]="isDeleting">
+        <mat-icon>delete_forever</mat-icon>
+        {{ isDeleting ? 'Διαγραφή...' : 'Οριστική Διαγραφή' }}
+      </button>
+    </div>
+
+  </div>
+</div>

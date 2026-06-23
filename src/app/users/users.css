@@ -1,0 +1,1204 @@
+/* =========================================================
+   DASHBOARD ΧΡΗΣΤΩΝ (YSOFT TASKS STYLE)
+   ========================================================= */
+
+.users-page-wrapper {
+  padding: 40px 50px;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* --- Επικεφαλίδα & Κουμπί Προσθήκης --- */
+.users-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.users-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1e1b4b; /* Navy Blue */
+  font-size: 32px;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.users-header h2 mat-icon {
+  color: #3f51b5; /* Primary Blue */
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}
+
+.users-header p {
+  color: #1e1b4b;
+  font-size: 16px;
+  margin: 0;
+}
+
+.add-btn {
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(63, 81, 181, 0.3);
+  transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+  background-color: #303f9f;
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   ΝΕΑ ΜΠΑΡΑ ΕΡΓΑΛΕΙΩΝ (ΑΝΑΖΗΤΗΣΗ & ΦΙΛΤΡΑ)
+   ========================================================= */
+.toolbar-container {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 35px;
+  position: relative;
+  z-index: 10;
+}
+
+/* --- Κεντρική Αναζήτηση --- */
+.main-search-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px 20px;
+  flex: 1;
+  max-width: 600px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.main-search-bar:focus-within {
+  border-color: #3f51b5;
+  box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.1);
+}
+
+.search-icon {
+  color: #64748b;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  margin-right: 5px;
+}
+
+.main-search-bar input {
+  border: none;
+  outline: none;
+  padding: 5px 10px;
+  width: 100%;
+  font-size: 15px;
+  color: #1e293b;
+  background: transparent;
+  font-family: inherit;
+}
+
+.clear-search-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.clear-search-btn:hover {
+  color: #ef4444;
+}
+
+/* --- Κουμπί Φίλτρων --- */
+.filter-wrapper {
+  position: relative;
+}
+
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  height: 100%;
+}
+
+.filter-toggle-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.filter-toggle-btn.active {
+  background: #eef2ff;
+  color: #3f51b5;
+  border-color: #c7d2fe;
+}
+
+/* --- Φίλτρο ρόλου (Όλοι / Διαχειριστές / Χρήστες) --- */
+.role-filter {
+  display: flex;
+  gap: 4px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.role-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #475569;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.role-filter-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.role-filter-btn:hover {
+  background: #f1f5f9;
+}
+
+.role-filter-btn.active {
+  background: #3f51b5;
+  color: white;
+}
+
+/* --- Inline μήνυμα λάθους μέσα στη φόρμα (όπως στο προφίλ) --- */
+.form-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+
+.form-error-alert mat-icon {
+  color: #e91e63;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.form-error-alert span {
+  color: #1e1b4b;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* --- "Ματάκι" κωδικού στη φόρμα --- */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  padding-right: 50px;
+  width: 100%;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.eye-btn:hover {
+  color: #3f51b5;
+}
+
+/* --- Αναδυόμενο Παραθυράκι Φίλτρων (Dropdown) --- */
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  width: 300px;
+  padding: 20px;
+  animation: slideDownFade 0.2s ease-out;
+}
+
+.filter-dropdown-header h4 {
+  margin: 0 0 15px 0;
+  color: #1e1b4b;
+  font-size: 15px;
+}
+
+.filter-dropdown-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.filter-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #e91e63;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.filter-error-msg mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.filter-dropdown-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 15px;
+}
+
+.apply-btn-small {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  margin: 0 !important;
+}
+
+.clear-btn-small {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+}
+
+/* --- Διάταξη σε Πλέγμα (Grid) για τις Κάρτες --- */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 25px;
+}
+
+.user-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  padding: 24px;
+  min-height: 120px; /* σταθερό ύψος -> όλες οι κάρτες ίδιες, τα κουμπιά ευθυγραμμισμένα */
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.user-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0; /* επιτρέπει στο κείμενο να συρρικνωθεί και να μπει "..." */
+}
+
+/* Η στήλη με όνομα + email */
+.user-text {
+  min-width: 0;
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0; /* το avatar να μη ζαρώνει ποτέ */
+  background: linear-gradient(135deg, #3f51b5, #1e1b4b);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(63, 81, 181, 0.3);
+}
+
+.user-info h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #1e1b4b;
+  line-height: 1.5;
+  /* Κανονική ροή: το badge ρέει σαν λέξη αμέσως μετά το όνομα */
+}
+
+/* Το όνομα: πλήρες, με αναδίπλωση σε 2η γραμμή αν χρειαστεί (χωρίς τελείες) */
+.user-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.user-email {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-badge {
+  background-color: #e91e63;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 5px rgba(233, 30, 99, 0.3);
+}
+
+.card-actions-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0; /* η στήλη ID + ενεργειών μένει σταθερή δεξιά */
+}
+
+.user-id {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;        /* μικρό κενό από το όνομα */
+  white-space: nowrap;
+  background: #f8fafc;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.edit-btn { color: #3f51b5; }
+.edit-btn:hover { background: rgba(63, 81, 181, 0.1); }
+
+.delete-btn { color: #ef4444; }
+.delete-btn:hover { background: rgba(239, 68, 68, 0.1); }
+
+/* --- Badge ρόλου ως toggle (admin <-> user) --- */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+  padding: 4px 10px 4px 8px;
+  border-radius: 20px;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;      /* το ίδιο το badge δεν σπάει */
+  /* Προεπιλογή: απλός χρήστης (User) */
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+.role-badge mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.role-badge:hover {
+  background-color: #cbd5e1;
+}
+
+/* Διαχειριστής (Admin) */
+.role-badge.admin {
+  background-color: #e91e63;
+  color: white;
+  box-shadow: 0 2px 5px rgba(233, 30, 99, 0.3);
+}
+
+.role-badge.admin:hover {
+  background-color: #d81557;
+}
+
+.error-banner {
+  background: #fee2e2;
+  color: #ef4444;
+  padding: 15px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  font-weight: 600;
+  border: 1px solid #f87171;
+}
+
+/* =========================================================
+   MODAL ΠΡΟΣΘΗΚΗΣ / ΕΠΕΞΕΡΓΑΣΙΑΣ 
+   ========================================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-box.form-card {
+  width: 100%;
+  max-width: 550px;
+  background: rgba(255, 255, 255, 0.98);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  animation: modalPop 0.4s ease-out;
+  max-height: 90vh; 
+  overflow-y: auto; 
+}
+
+.form-title {
+  font-size: 28px;
+  color: #1e1b4b;
+  margin-bottom: 25px;
+  font-weight: bold;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.required { color: #ef4444; }
+
+.form-group input, .custom-select {
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #1e293b;
+}
+
+.form-group input:focus, .custom-select:focus {
+  outline: none;
+  border-color: #3f51b5;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(63, 81, 181, 0.1);
+}
+
+.required-note {
+  font-size: 12px;
+  color: #777;
+  text-align: left;
+  margin-top: -5px;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.cancel-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancel-btn:hover { background: #e2e8f0; }
+
+.submit-btn.save-btn-custom {
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+}
+
+.submit-btn.save-btn-custom:hover {
+  background-color: #2c387e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(63, 81, 181, 0.4);
+}
+
+.date-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.date-toggle {
+  position: absolute;
+  right: 8px;
+  color: #64748b;
+}
+
+.date-wrapper input { padding-right: 40px !important; }
+
+/* =========================================================
+   MODAL ΠΡΟΒΟΛΗΣ TASKS
+   ========================================================= */
+.tasks-modal {
+  max-width: 650px !important;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important; 
+  overflow: hidden !important;
+}
+
+.tasks-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 30px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tasks-modal-header h2 {
+  margin: 0 !important;
+  font-size: 20px !important;
+}
+
+.close-icon-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.close-icon-btn:hover { background: #e2e8f0; color: #1e293b; }
+
+.tasks-modal-body {
+  padding: 30px;
+  overflow-y: auto;
+  flex: 1;
+  background: #f1f5f9;
+}
+
+.no-tasks-msg {
+  text-align: center;
+  color: #94a3b8;
+  padding: 40px 0;
+}
+
+.no-tasks-msg mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.5; margin-bottom: 10px; }
+
+/* =========================================================
+   MODAL ΠΡΟΒΟΛΗΣ TASKS - PREMIUM DESIGN
+   ========================================================= */
+.tasks-modal {
+  width: 90vw !important;      
+  max-width: 800px !important;
+  max-height: 80vh !important; 
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-modal-header {
+  padding: 30px;
+  background: linear-gradient(135deg, #3f51b5, #1e1b4b);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tasks-modal-header h2 {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  letter-spacing: 0.5px;
+}
+
+.close-icon-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.close-icon-btn:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
+
+.tasks-modal-body {
+  padding: 25px;
+  background: #f8fafc;
+  max-height: 60vh;
+  overflow-y: auto;
+  
+}
+
+/* --- Κάρτα Task --- */
+.task-list-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.task-list-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: #c7d2fe;
+}
+
+.task-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.task-list-header h3 { 
+  margin: 0; 
+  color: #1e1b4b; 
+  font-size: 17px; 
+  font-weight: 700;
+}
+
+.status-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(233, 30, 99, 0.12);
+  color: #e91e63;
+}
+
+.status-badge.completed {
+  background: rgba(63, 81, 181, 0.12);
+  color: #3f51b5;
+}
+
+/* --- Λίστα Items --- */
+.task-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+}
+
+.task-items-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #475569;
+  padding: 8px 0;
+}
+
+.bullet-icon { 
+  font-size: 16px; 
+  width: 16px; 
+  height: 16px; 
+  color: #6366f1; 
+}
+
+.no-items-msg { font-size: 13px; color: #94a3b8; font-style: italic; margin-top: 10px;}
+
+/* --- Συνημμένα αρχεία μέσα στην κάρτα task --- */
+.task-files-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.task-files-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6366f1;
+  margin-bottom: 10px;
+}
+
+.task-files-title mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.files-count-badge {
+  background: #eef2ff;
+  color: #3f51b5;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 20px;
+}
+
+.task-files-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.task-file-row:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  transform: translateY(-1px);
+}
+
+.task-file-row .file-type-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  color: #3f51b5;
+  flex-shrink: 0;
+}
+
+.task-file-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.task-file-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e1b4b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-file-size {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.file-download-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: #3f51b5;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.file-download-btn:hover {
+  background: rgba(63, 81, 181, 0.12);
+}
+
+/* =========================================================
+   INFO / CONFIRM MODALS
+   ========================================================= */
+.info-modal-box {
+  max-width: 420px;
+  width: 90%;
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  animation: modalPop 0.4s ease-out;
+  text-align: center;
+}
+
+.info-modal-icon {
+  width: 64px;
+  height: 64px;
+  background: #eef2ff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+}
+
+.info-modal-icon mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #3f51b5;
+}
+
+.info-modal-message {
+  color: #475569;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+/* --- Delete Confirmation Modal --- */
+.del-confirm-box {
+  max-width: 430px;
+  width: 90%;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  animation: modalPop 0.4s ease-out;
+}
+
+.del-confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.del-confirm-icon-wrap {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  background: #fff1f2;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.del-confirm-icon-wrap mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  color: #e91e63;
+}
+
+.del-confirm-title {
+  color: #1e1b4b;
+  font-size: 20px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.del-confirm-body {
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.del-confirm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.del-confirm-btn {
+  padding: 0 24px;
+  height: 44px;
+  background: #e91e63;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+}
+
+.del-confirm-btn:hover {
+  background: #c2185b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(233, 30, 99, 0.4);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ========================================================= */
+/* CUSTOM DROPDOWN ΓΙΑ ΤΟΝ ΡΟΛΟ                               */
+/* ========================================================= */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+/* Το "κλειστό" κουτί - μοιάζει με τα υπόλοιπα inputs */
+.dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.dropdown-trigger:hover {
+  border-color: #a5b4fc;
+}
+
+.custom-dropdown.open .dropdown-trigger {
+  border-color: #3f51b5;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(63, 81, 181, 0.1);
+}
+
+.dropdown-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.dropdown-value .role-icon {
+  color: #3f51b5;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.dropdown-arrow {
+  color: #64748b;
+  transition: transform 0.25s ease;
+}
+
+.custom-dropdown.open .dropdown-arrow {
+  transform: rotate(180deg);
+  color: #3f51b5;
+}
+
+/* Η λίστα επιλογών */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+  padding: 6px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: dropdownFade 0.18s ease-out;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-option .role-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: #64748b;
+}
+
+.dropdown-option span {
+  flex: 1;
+  font-weight: 500;
+}
+
+.dropdown-option:hover {
+  background: #eef2ff;          
+  color: #1e1b4b;
+}
+
+.dropdown-option:hover .role-icon {
+  color: #3f51b5;
+}
+
+/* Η ήδη επιλεγμένη τιμή */
+.dropdown-option.selected {
+  background: #eef2ff;
+  color: #3f51b5;
+}
+
+.dropdown-option.selected .role-icon {
+  color: #3f51b5;
+}
+
+.dropdown-option .check-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #3f51b5;
+}
+
+@keyframes dropdownFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

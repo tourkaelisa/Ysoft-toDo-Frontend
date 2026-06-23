@@ -1,0 +1,76 @@
+<aside class="sidebar">
+  
+  <div class="sidebar-header">
+    <div class="logo-circle">
+      <mat-icon>task_alt</mat-icon>
+    </div>
+    <h2>Ysoft Tasks</h2>
+
+    <!-- Καμπανάκι ειδοποιήσεων (μόνο για admin) -->
+    <div *ngIf="isAdmin()" class="notif-wrapper">
+      <button class="notif-bell" (click)="toggleDropdown()" aria-label="Ειδοποιήσεις">
+        <mat-icon>notifications</mat-icon>
+        <span *ngIf="notifications.unreadCount() > 0" class="notif-badge">
+          {{ notifications.unreadCount() }}
+        </span>
+      </button>
+
+      <div *ngIf="isDropdownOpen" class="notif-dropdown">
+        <div class="notif-dropdown-header">
+          <span>Ειδοποιήσεις</span>
+          <button
+            *ngIf="notifications.notifications().length > 0"
+            class="notif-clear"
+            (click)="clearNotifications($event)">
+            Καθαρισμός
+          </button>
+        </div>
+
+        <div *ngIf="notifications.notifications().length === 0" class="notif-empty">
+          Δεν υπάρχουν νέες ειδοποιήσεις
+        </div>
+
+        <button
+          *ngFor="let n of notifications.notifications()"
+          class="notif-item"
+          [class.unread]="!n.read"
+          (click)="openNotification(n)">
+          <span class="notif-dot" *ngIf="!n.read"></span>
+          <mat-icon class="notif-item-icon">assignment</mat-icon>
+          <span class="notif-text">
+            <strong>{{ n.userName }}</strong> δημιούργησε το task
+            «{{ n.title }}»
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a routerLink="/home" routerLinkActive="active-link" class="nav-item">
+      <mat-icon>dashboard</mat-icon>
+      <span>Αρχική</span>
+    </a>
+    <a routerLink="/tasks" routerLinkActive="active-link" class="nav-item">
+      <mat-icon>assignment</mat-icon>
+      <span>Οι Εργασίες μου</span>
+    </a>
+    <a *ngIf="isAdmin()" routerLink="/users" routerLinkActive="active-link" class="nav-item">
+      <mat-icon>people</mat-icon>
+      <span>Χρήστες</span>
+    </a>
+
+    <a routerLink="/profile" routerLinkActive="active-link" class="nav-item">
+      <mat-icon>person</mat-icon>
+      <span>Το Προφίλ μου</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Αποσύνδεση</span>
+    </button>
+  </div>
+
+</aside>

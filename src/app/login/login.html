@@ -1,0 +1,50 @@
+<div class="auth-container">
+  
+  <div class="auth-layout">
+    
+    <div class="info-section">
+      <h1 class="info-title">Καλώς ήρθες ξανά στο <br><span class="highlight">Ysoft Tasks</span></h1>
+      <p class="info-subtitle">
+        Συνδέσου για να δεις τις εργασίες σου και να συνεχίσεις την οργάνωση από εκεί που σταμάτησες.
+      </p>
+    </div>
+
+    <div class="form-card">
+      <h2 class="form-title">Σύνδεση</h2>
+      
+      <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" [(ngModel)]="credentials.email" placeholder="name@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>Κωδικός Πρόσβασης</label>
+          <div class="password-wrapper">
+            <input [type]="isPasswordVisible ? 'text' : 'password'" name="password" [(ngModel)]="credentials.password" placeholder="Πληκτρολογήστε κωδικό..." required>
+            <button type="button" class="eye-btn" (click)="isPasswordVisible = !isPasswordVisible">
+              <mat-icon>{{ isPasswordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessage()" class="alert error-alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
+
+        <div class="forgot-link-row">
+          <a routerLink="/forgot-password">Ξέχασες τον κωδικό σου;</a>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loginForm.invalid">Είσοδος</button>
+
+        <div class="form-footer">
+          Δεν έχεις λογαριασμό; <a routerLink="/register">Εγγραφή</a>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
