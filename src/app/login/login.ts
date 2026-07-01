@@ -2,7 +2,9 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../auth';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../core/auth.service';
+import { AuthResponse } from '../core/auth.model';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -23,21 +25,19 @@ export class LoginComponent {
     private router: Router
   ) {}
 
-  onLogin() {
-    this.authService.login(this.credentials.email, this.credentials.password).subscribe({
-      next: (response: any) => { 
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        
-        this.errorMessage.set(''); 
-        this.router.navigate(['/home']); 
-      },
-      error: (err: any) => {
-        const message = err.error?.message || 'Λάθος email ή κωδικός πρόσβασης.';
-        this.errorMessage.set(message);
+  async onLogin() {
+    try {
+      const response: AuthResponse = await this.authService.login(this.credentials.email, this.credentials.password);
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
 
-        this.credentials.password = '';
-      }
-    });
+      this.errorMessage.set('');
+      this.router.navigate(['/home']);
+    } catch (err) {
+      const message = (err as HttpErrorResponse).error?.message || 'Λάθος email ή κωδικός πρόσβασης.';
+      this.errorMessage.set(message);
+
+      this.credentials.password = '';
+    }
   }
 }

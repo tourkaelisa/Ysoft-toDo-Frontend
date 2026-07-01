@@ -1,7 +1,4 @@
-/* =========================================================
-   1. ΚΕΝΤΡΙΚΟ LAYOUT ΣΕΛΙΔΑΣ
-   ========================================================= */
-
+/* ΚΕΝΤΡΙΚΟ LAYOUT ΣΕΛΙΔΑΣ */
 .tasks-page-wrapper {
   padding: 40px 50px;
   max-width: 100%;
@@ -10,9 +7,7 @@
   animation: tasksFadeIn 0.5s ease-out;
 }
 
-/* =========================================================
-   2. ΕΠΙΚΕΦΑΛΙΔΑ
-   ========================================================= */
+/* ΕΠΙΚΕΦΑΛΙΔΑ */
 
 .tasks-main-header {
   display: flex;
@@ -24,21 +19,21 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #1e1b4b;
+  color: var(--navy);
   font-size: 32px;
   margin: 0 0 8px 0;
   font-weight: 700;
 }
 
 .tasks-main-header h2 mat-icon {
-  color: #3f51b5;
+  color: var(--primary);
   font-size: 36px;
   width: 36px;
   height: 36px;
 }
 
 .tasks-main-header p {
-  color: #1e1b4b;
+  color: var(--navy);
   font-size: 16px;
   margin: 0;
 }
@@ -57,14 +52,12 @@
 
 .tasks-error-alert mat-icon,
 .tasks-error-alert span {
-  color: #e91e63;
+  color: var(--accent);
   font-weight: 500;
   font-size: 14px;
 }
 
-/* =========================================================
-   3. SPLIT LAYOUT — ΛΙΣΤΑ + SIDE PANEL
-   ========================================================= */
+/* SPLIT LAYOUT — ΛΙΣΤΑ + SIDE PANEL*/
 
 .tasks-split-layout {
   display: grid;
@@ -79,9 +72,7 @@
   min-width: 0;
 }
 
-/* =========================================================
-   4. ΦΟΡΜΑ ΠΡΟΣΘΗΚΗΣ (ΠΙΟ ΣΥΜΠΑΓΗΣ)
-   ========================================================= */
+/* ΦΟΡΜΑ ΠΡΟΣΘΗΚΗΣ  */
 
 .main-task-form-card {
   background: rgba(255, 255, 255, 0.9);
@@ -130,17 +121,16 @@
 
 .main-task-form-card input:focus {
   outline: none;
-  border-color: #3f51b5;
+  border-color: var(--primary);
   background: white;
   box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.1);
 }
 
-/* Πιο μικρό κουμπί προσθήκης — μόνο εικονίδιο */
-.primary-task-btn {
-  height: 44px;
-  width: 44px;
+/* Κοινά στυλ για τα primary/secondary κουμπιά (διαφέρουν μόνο σε μέγεθος/shadow) */
+.primary-task-btn,
+.secondary-task-btn {
   padding: 0;
-  background-color: #3f51b5;
+  background-color: var(--primary);
   color: white;
   border: none;
   border-radius: 10px;
@@ -148,32 +138,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.25);
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
-.primary-task-btn:hover {
-  background-color: #2c387e;
+.primary-task-btn {
+  height: 44px;
+  width: 44px;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.25);
+}
+
+.primary-task-btn:hover,
+.secondary-task-btn:hover {
+  background-color: var(--primary-dark);
   transform: translateY(-1px);
 }
 
-.primary-task-btn:disabled {
-  background-color: #c7cbe6;
+.primary-task-btn:disabled,
+.secondary-task-btn:disabled {
+  background-color: var(--primary-disabled);
   cursor: not-allowed;
-  box-shadow: none;
   transform: none;
 }
 
-/* =========================================================
-   5. ΣΥΜΠΑΓΗΣ ΛΙΣΤΑ TASKS
-   ========================================================= */
+.primary-task-btn:disabled {
+  box-shadow: none;
+}
+
+/* ΛΙΣΤΑ TASKS */
 
 .tasks-compact-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  background: transparent; /* Αφαιρούμε το background από τη λίστα */
+  background: transparent; 
   border: none;
   box-shadow: none;
 }
@@ -191,16 +189,15 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: all 0.2s ease;
-  box-sizing: border-box; /* Πολύ σημαντικό για σωστά υπολογισμένο ύψος */
+  box-sizing: border-box; 
 }
 
 .compact-task-row:hover {
-  transform: translateY(-2px); /* Μικρή ανύψωση στο hover */
-  border-color: #3f51b5;
+  transform: translateY(-2px); 
+  border-color: var(--primary);
   box-shadow: 0 10px 15px -3px rgba(63, 81, 181, 0.1);
 }
 
-/* Αφαιρούμε το border-bottom που υπήρχε πριν */
 .compact-task-row:last-child {
   margin-bottom: 0;
 }
@@ -208,28 +205,28 @@
 /* Επιλεγμένο task — έντονη οπτική ένδειξη */
 .compact-task-row.active-task {
   background: linear-gradient(90deg, #eef1ff 0%, #f8f9ff 100%) !important;
-  border: 3px solid #1a237e;         /* Πιο σκούρο, έντονο περίγραμμα */
+  border: 3px solid #1a237e;       
   padding-left: 19px;
   box-shadow: 0 14px 30px -6px rgba(26, 35, 126, 0.5),
-              0 0 0 4px rgba(26, 35, 126, 0.15); /* Λάμψη γύρω-γύρω */
-  transform: scale(1.02);            /* Μεγαλύτερη μεγέθυνση */
+              0 0 0 4px rgba(26, 35, 126, 0.15); 
+  transform: scale(1.02);         
   z-index: 2;
   position: relative;
 }
 
 .compact-task-row.active-task .compact-task-title {
-  color: #3f51b5;
+  color: var(--primary);
 }
 
 .compact-task-row.active-task .compact-chevron {
-  color: #3f51b5;
+  color: var(--primary);
   transform: translateX(2px);
 }
 
 .compact-task-title {
   font-size: 17px;
   font-weight: 700;
-  color: #1e1b4b;
+  color: var(--navy);
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -276,11 +273,10 @@
 }
 
 .compact-task-row:hover .compact-chevron {
-  color: #3f51b5;
+  color: var(--primary);
   transform: translateX(2px);
 }
 
-/* CUSTOM CHECKBOX (πιο μικρό για τη συμπαγή λίστα) */
 .custom-checkbox-container {
   display: block;
   position: relative;
@@ -300,8 +296,8 @@
   transition: all 0.2s ease;
 }
 
-.custom-checkbox-container:hover input ~ .checkbox-checkmark { border-color: #3f51b5; }
-.custom-checkbox-container input:checked ~ .checkbox-checkmark { background-color: #3f51b5; border-color: #3f51b5; }
+.custom-checkbox-container:hover input ~ .checkbox-checkmark { border-color: var(--primary); }
+.custom-checkbox-container input:checked ~ .checkbox-checkmark { background-color: var(--primary); border-color: var(--primary); }
 
 .checkbox-checkmark:after {
   content: "";
@@ -320,7 +316,6 @@
   display: block;
 }
 
-/* EMPTY STATE */
 .empty-tasks-state-card {
   background: rgba(255, 255, 255, 0.6);
   border-radius: 14px;
@@ -336,14 +331,12 @@
   font-size: 36px;
   width: 36px;
   height: 36px;
-  color: #3f51b5;
+  color: var(--primary);
   opacity: 0.5;
   margin-bottom: 8px;
 }
 
-/* =========================================================
-   6. SIDE PANEL ΛΕΠΤΟΜΕΡΕΙΩΝ
-   ========================================================= */
+/* SIDE PANEL ΛΕΠΤΟΜΕΡΕΙΩΝ */
 
 .task-detail-panel {
   background: rgba(255, 255, 255, 0.92);
@@ -398,19 +391,19 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #e91e63;
+  color: var(--accent);
   display: inline-block;
 }
 
 .detail-status-label.completed {
-  color: #1e1b4b;
+  color: var(--navy);
 }
 
 .detail-header-text h3 {
   margin: 0;
   font-size: 19px;
   font-weight: 700;
-  color: #1e1b4b;
+  color: var(--navy);
   line-height: 1.3;
   overflow-wrap: anywhere;
   transition: all 0.3s ease;
@@ -438,7 +431,7 @@
 
 .detail-close-btn:hover {
   background: #f1f5f9;
-  color: #e91e63;
+  color: var(--accent);
   border-color: #fecaca;
 }
 
@@ -449,28 +442,24 @@
 }
 
 /* ACTION BUTTONS PANEL */
-/* Στο αρχείο tasks.css */
 
 .detail-panel-actions {
   display: flex;
-  flex-direction: column; /* Στοίβαξη το ένα κάτω από το άλλο */
+  flex-direction: column; 
   gap: 12px;
   padding: 20px 24px;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .detail-action-btn {
-  /* Αφαιρούμε το flex: 1 για να μην τεντώνουν υπερβολικά */
   width: 100%; 
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  /* Μεγαλύτερο ύψος για πιο "χοντρά" κουμπιά */
   height: 52px; 
   padding: 0 24px;
   background: #f8fafc;
-  /* Πιο παχύ border για να φαίνονται πιο στιβαρά */
   border: 2px solid #e2e8f0; 
   border-radius: 12px;
   color: #475569;
@@ -488,13 +477,13 @@
 
 .detail-action-btn:hover {
   background: rgba(63, 81, 181, 0.08);
-  color: #3f51b5;
+  color: var(--primary);
   border-color: #c7d2fe;
 }
 
 .detail-action-btn.detail-delete:hover {
   background: rgba(239, 68, 68, 0.08);
-  color: #e91e63;
+  color: var(--accent);
   border-color: #fecaca;
 }
 
@@ -508,7 +497,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 14px;
-  color: #1e1b4b;
+  color: var(--navy);
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
@@ -516,14 +505,14 @@
 }
 
 .detail-section-title mat-icon {
-  color: #3f51b5;
+  color: var(--primary);
   font-size: 18px;
   width: 18px;
   height: 18px;
 }
 
 .detail-count-badge {
-  background: #3f51b5;
+  background: var(--primary);
   color: white;
   font-size: 11px;
   font-weight: 800;
@@ -533,22 +522,24 @@
   letter-spacing: 0;
 }
 
-/* =========================================================
-   7. SUBTASKS LIST (μέσα στο side panel)
-   ========================================================= */
+/* SUBTASKS LIST (μέσα στο side panel) */
 
-.subtasks-list {
+/* Κοινά στυλ λίστας/σειρών για subtasks & files */
+.subtasks-list,
+.files-list {
   list-style: none; padding: 0; margin: 0 0 14px 0;
   display: flex; flex-direction: column; gap: 8px;
 }
 
-.subtask-item-row {
+.subtask-item-row,
+.file-item-row {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   padding: 10px 14px; background: white; border-radius: 10px; border: 1px solid #e2e8f0;
   transition: border-color 0.2s ease;
 }
 
-.subtask-item-row:hover { border-color: #c7d2fe; }
+.subtask-item-row:hover,
+.file-item-row:hover { border-color: #c7d2fe; }
 
 .subtask-content {
   display: flex;
@@ -596,8 +587,8 @@
 }
 
 .sub-action-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
-.sub-action-btn:hover { color: #3f51b5; background: #f1f5f9; }
-.sub-action-btn.sub-delete:hover { color: #e91e63; }
+.sub-action-btn:hover { color: var(--primary); background: #f1f5f9; }
+.sub-action-btn.sub-delete:hover { color: var(--accent); }
 
 .add-subtask-form { display: flex; gap: 8px; }
 .add-subtask-form input {
@@ -607,50 +598,21 @@
 }
 
 .add-subtask-form input:focus {
-  outline: none; border-color: #3f51b5;
+  outline: none; border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.1);
 }
 
 .secondary-task-btn {
   height: 40px;
   width: 40px;
-  padding: 0;
-  background-color: #3f51b5;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
 }
 
-.secondary-task-btn:hover { background-color: #2c387e; transform: translateY(-1px); }
-.secondary-task-btn:disabled { background-color: #c7cbe6; cursor: not-allowed; transform: none; }
-
-/* =========================================================
-   7β. FILES LIST (μέσα στο side panel)
-   ========================================================= */
+/* FILES LIST (μέσα στο side panel)*/
 
 .files-section {
   padding-top: 0;
   border-top: 1px solid #f1f5f9;
 }
-
-.files-list {
-  list-style: none; padding: 0; margin: 0 0 14px 0;
-  display: flex; flex-direction: column; gap: 8px;
-}
-
-.file-item-row {
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  padding: 10px 14px; background: white; border-radius: 10px; border: 1px solid #e2e8f0;
-  transition: border-color 0.2s ease;
-}
-
-.file-item-row:hover { border-color: #c7d2fe; }
 
 .file-content {
   display: flex;
@@ -662,7 +624,7 @@
 }
 
 .file-type-icon {
-  color: #3f51b5;
+  color: var(--primary);
   font-size: 22px;
   width: 22px;
   height: 22px;
@@ -684,7 +646,7 @@
   white-space: nowrap;
 }
 
-.file-content:hover .file-name { color: #3f51b5; }
+.file-content:hover .file-name { color: var(--primary); }
 
 .file-size {
   font-size: 12px;
@@ -705,7 +667,7 @@
   background: #f8fafc;
   border: 2px dashed #c7d2fe;
   border-radius: 12px;
-  color: #3f51b5;
+  color: var(--primary);
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -714,7 +676,7 @@
 
 .upload-file-btn:hover {
   background: rgba(63, 81, 181, 0.08);
-  border-color: #3f51b5;
+  border-color: var(--primary);
 }
 
 .upload-file-btn:disabled {
@@ -728,9 +690,7 @@
   height: 18px;
 }
 
-/* =========================================================
-   8. PLACEHOLDER ΟΤΑΝ ΔΕΝ ΕΧΕΙ ΕΠΙΛΕΓΕΙ ΤΙΠΟΤΑ
-   ========================================================= */
+/* PLACEHOLDER ΟΤΑΝ ΔΕΝ ΕΧΕΙ ΕΠΙΛΕΓΕΙ ΤΙΠΟΤΑ */
 
 .detail-placeholder {
   display: flex;
@@ -746,7 +706,7 @@
   font-size: 56px;
   width: 56px;
   height: 56px;
-  color: #3f51b5;
+  color: var(--primary);
   opacity: 0.4;
   margin-bottom: 16px;
 }
@@ -754,7 +714,7 @@
 .detail-placeholder h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
-  color: #1e1b4b;
+  color: var(--navy);
   font-weight: 700;
 }
 
@@ -766,9 +726,7 @@
   max-width: 280px;
 }
 
-/* =========================================================
-   9. ANIMATIONS & RESPONSIVE
-   ========================================================= */
+/* ANIMATIONS & RESPONSIVE */
 
 @keyframes tasksFadeIn {
   from { opacity: 0; transform: translateY(20px); }
@@ -792,14 +750,11 @@
   .tasks-main-header h2 mat-icon { font-size: 28px; width: 28px; height: 28px; }
   .compact-task-row { padding: 14px 14px; }
   .detail-panel-header { padding: 18px; }
-  .detail-panel-actions { padding: 14px 18px; }
+  .detail-panel-actions { padding: 14px 18px; flex-direction: column; }
   .detail-panel-section { padding: 16px 18px 20px 18px; }
-  .detail-panel-actions { flex-direction: column; }
 }
 
-/* =========================================================
-   10. CUSTOM POP-UP ΕΠΕΞΕΡΓΑΣΙΑΣ (MODAL)
-   ========================================================= */
+/* CUSTOM POP-UP ΕΠΕΞΕΡΓΑΣΙΑΣ (MODAL) */
 
 .modal-overlay {
   position: fixed;
@@ -841,12 +796,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #1e1b4b;
+  color: var(--navy);
   font-size: 20px;
   margin: 0;
 }
 
-.modal-header mat-icon { color: #3f51b5; }
+.modal-header mat-icon { color: var(--primary); }
 
 .close-modal-btn {
   background: none; border: none; cursor: pointer; color: #94a3b8;
@@ -854,7 +809,7 @@
   padding: 6px; border-radius: 50%; transition: all 0.2s;
 }
 
-.close-modal-btn:hover { background: #f1f5f9; color: #e91e63; }
+.close-modal-btn:hover { background: #f1f5f9; color: var(--accent); }
 
 .modal-input {
   width: 100%; height: 50px; box-sizing: border-box; padding: 0 15px;
@@ -863,7 +818,7 @@
 }
 
 .modal-input:focus {
-  outline: none; border-color: #3f51b5; background: white;
+  outline: none; border-color: var(--primary); background: white;
   box-shadow: 0 0 0 4px rgba(63, 81, 181, 0.1);
 }
 
@@ -883,13 +838,8 @@
   animation: fadeInAlert 0.3s ease-out forwards;
 }
 
-.modal-error-alert mat-icon { color: #e91e63; font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
-.modal-error-alert span { color: #1e1b4b; }
-
-@keyframes fadeInAlert {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.modal-error-alert mat-icon { color: var(--accent); font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
+.modal-error-alert span { color: var(--navy); }
 
 .modal-footer {
   display: flex; justify-content: flex-end; gap: 12px;
@@ -900,18 +850,17 @@
   border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
 
-.modal-cancel-btn:hover { background: #e2e8f0; color: #1e1b4b; }
+.modal-cancel-btn:hover { background: #e2e8f0; color: var(--navy); }
 
 .modal-save-btn {
-  padding: 0 20px; height: 44px; background: #3f51b5; color: white;
+  padding: 0 20px; height: 44px; background: var(--primary); color: white;
   border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 6px; transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(63, 81, 181, 0.25);
 }
 
-.modal-save-btn:hover { background: #2c387e; transform: translateY(-1px); }
+.modal-save-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
 .delete-card {
@@ -919,17 +868,17 @@
 }
 
 .delete-card .modal-header h3 {
-  color: #1e1b4b !important;
+  color: var(--navy) !important;
 }
 
 .delete-card .modal-header mat-icon {
-  color: #e91e63;
+  color: var(--accent);
 }
 
 .modal-delete-btn {
   padding: 0 20px;
   height: 44px;
-  background: #e91e63;
+  background: var(--accent);
   color: white;
   border: none;
   border-radius: 10px;

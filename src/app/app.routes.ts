@@ -9,10 +9,10 @@ import { ProfileComponent } from './profile/profile';
 import { UsersComponent } from './users/users';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password';
 import { ResetPasswordComponent } from './reset-password/reset-password';
-import { authGuard } from './auth-guard';
+import { authGuard } from './core/auth.guard';
 
 export const routes: Routes = [
-  // 1. Η Πρώτη σελίδα (το σκέτο URL) τώρα φορτώνει τη Landing Page!
+  // Η πρώτη σελίδα (το σκέτο URL) (landing page)
   { path: '', component: LandingComponent },
 
   { path: 'login', component: LoginComponent },
@@ -20,12 +20,12 @@ export const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
 
-  // Προστατευμένες σελίδες: απαιτούν έγκυρο (μη ληγμένο) token.
+  // σελίδες που απαιτούν token.
   { path: 'home', component: HomeComponent, canActivate: [authGuard] },
   { path: 'tasks', component: TasksComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'users', component: UsersComponent, canActivate: [authGuard] },
 
-  // 2. Αν κάποιος γράψει λάθος URL (π.χ. /lalala), πήγαινέ τον πίσω στην αρχική (Landing)
+  // Αν κάποιος γράψει λάθος URL, πάει στο Landing
   { path: '**', redirectTo: '' }
 ];

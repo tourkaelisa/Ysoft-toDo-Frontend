@@ -1,9 +1,10 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { Chart } from 'chart.js/auto';
+import { HomeService } from './home.service';
+import { AdminStats, UserStats, TimeSeriesStats, RecentUser, SessionUser } from './home.model';
 
 @Component({
   selector: 'app-home',
@@ -13,14 +14,14 @@ import { Chart } from 'chart.js/auto';
   styleUrl: './home.css'
 })
 export class HomeComponent implements OnInit, AfterViewInit {
-  user: any = null;
+  user: SessionUser | null = null;
   isAdmin = false;
-  stats = signal<any>(null);
+  stats = signal<AdminStats | null>(null);
   errorMessage = signal('');
 
-  // ===== ΓΡΑΦΗΜΑ ΕΓΓΡΑΦΩΝ ΧΡΗΣΤΩΝ =====
+  // ΓΡΑΦΗΜΑ ΕΓΓΡΑΦΩΝ ΧΡΗΣΤΩΝ
   @ViewChild('regCanvas') regCanvas?: ElementRef<HTMLCanvasElement>;
-  registrations = signal<any>(null);
+  registrations = signal<TimeSeriesStats | null>(null);
   chartMode = signal<'cumulative' | 'daily'>('cumulative');
   private regChart?: Chart;
   private viewReady = false;
@@ -29,9 +30,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   regLast30 = computed(() => this.registrations()?.last30Days || 0);
   regPeak = computed(() => this.registrations()?.peak ?? { date: null, count: 0 });
 
-  // ===== ΓΡΑΦΗΜΑ ΔΗΜΙΟΥΡΓΙΑΣ ΕΡΓΑΣΙΩΝ =====
+  // ΓΡΑΦΗΜΑ ΔΗΜΙΟΥΡΓΙΑΣ ΕΡΓΑΣΙΩΝ 
   @ViewChild('taskCanvas') taskCanvas?: ElementRef<HTMLCanvasElement>;
-  taskCreation = signal<any>(null);
+  taskCreation = signal<TimeSeriesStats | null>(null);
   taskChartMode = signal<'daily' | 'weekly'>('daily');
   private taskChart?: Chart;
 
@@ -39,10 +40,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   taskLast30 = computed(() => this.taskCreation()?.last30Days || 0);
   taskPeak = computed(() => this.taskCreation()?.peak ?? { date: null, count: 0 });
 
-  // ===== ΤΕΛΕΥΤΑΙΕΣ ΕΓΓΡΑΦΕΣ =====
-  recentUsers = signal<any[]>([]);
+  recentUsers = signal<RecentUser[]>([]);
 
-  // ΥΠΟΛΟΓΙΖΟΜΕΝΕΣ ΤΙΜΕΣ ΓΙΑ ΤΟ DASHBOARD
   totalUsers = computed(() => {
     const s = this.stats();
     return s?.tasksPerUser?.length || 0;
@@ -60,38 +59,35 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return Math.round((s.pendingTasks / s.totalTasks) * 100);
   });
 
-  // Top 5 χρήστες με τις πιο πολλές εργασίες
+  // Top 5 
   topUsers = computed(() => {
     const s = this.stats();
     if (!s?.tasksPerUser) return [];
     return [...s.tasksPerUser]
-      .sort((a: any, b: any) => b.task_count - a.task_count)
+      .sort((a, b) => b.task_count - a.task_count)
       .slice(0, 5);
   });
 
-  // Μέγιστο πλήθος εργασιών (για normalize των bars)
   maxTaskCount = computed(() => {
     const top = this.topUsers();
     if (top.length === 0) return 1;
-    return Math.max(...top.map((u: any) => u.task_count), 1);
+    return Math.max(...top.map((u) => u.task_count), 1);
   });
 
-  // Χρήστες χωρίς καμία εργασία
   inactiveUsers = computed(() => {
     const s = this.stats();
     if (!s?.tasksPerUser) return 0;
-    return s.tasksPerUser.filter((u: any) => u.task_count === 0).length;
+    return s.tasksPerUser.filter((u) => u.task_count === 0).length;
   });
 
-  // Μέσος όρος εργασιών ανά χρήστη
   avgTasksPerUser = computed(() => {
     const s = this.stats();
     if (!s?.tasksPerUser || s.tasksPerUser.length === 0) return 0;
     return (s.totalTasks / s.tasksPerUser.length).toFixed(1);
   });
 
-  // Στατιστικά του συνδεδεμένου χρήστη (έρχονται έτοιμα από το /api/stats)
-  userStats = signal<any>(null);
+  // Στατιστικά του συνδεδεμένου χρήστη
+  userStats = signal<UserStats | null>(null);
 
   userTotalTasks = computed(() => this.userStats()?.totalTasks || 0);
   userCompletedTasks = computed(() => this.userStats()?.completedTasks || 0);
@@ -102,7 +98,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return Math.round((this.userCompletedTasks() / total) * 100);
   });
 
-  constructor(private http: HttpClient) {}
+  constructor(private homeService: HomeService) {}
 
   ngOnInit() {
     this.checkRoleAndLoadStats();
@@ -110,7 +106,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.viewReady = true;
-    // Αν τα δεδομένα ήρθαν πριν φορτώσει το view, ζωγραφίζουμε τώρα
     this.renderRegChart();
     this.renderTaskChart();
   }
@@ -121,7 +116,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     if (userString) {
       this.user = JSON.parse(userString);
 
-      if (this.user.role_name === 'admin') {
+      if (this.user?.role_name === 'admin') {
         this.isAdmin = true;
         this.loadAdminStats();
       } else {
@@ -130,53 +125,48 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
   }
 
-  loadUserStats() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    this.http.get('http://localhost:5000/api/stats/user', { headers }).subscribe({
-      next: (data: any) => this.userStats.set(data),
-      error: () => this.errorMessage.set('Αποτυχία φόρτωσης στατιστικών δεδομένων.')
-    });
+  async loadUserStats() {
+    try {
+      const data = await this.homeService.getUserStats();
+      this.userStats.set(data);
+    } catch {
+      this.errorMessage.set('Αποτυχία φόρτωσης στατιστικών δεδομένων.');
+    }
   }
 
-  loadAdminStats() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  async loadAdminStats() {
+    try {
+      const data = await this.homeService.getAdminStats();
+      this.stats.set(data);
+    } catch (err) {
+      console.error('Σφάλμα φόρτωσης admin stats:', err);
+      this.errorMessage.set('Αποτυχία φόρτωσης στατιστικών δεδομένων.');
+    }
 
-    this.http.get('http://localhost:5000/api/stats/admin', { headers }).subscribe({
-      next: (data: any) => {
-        this.stats.set(data);
-      },
-      error: (err) => {
-        console.error('Σφάλμα φόρτωσης admin stats:', err);
-        this.errorMessage.set('Αποτυχία φόρτωσης στατιστικών δεδομένων.');
-      }
-    });
+    try {
+      const data = await this.homeService.getRegistrations();
+      this.registrations.set(data);
+      this.renderRegChart();
+    } catch (err) {
+      console.error('Σφάλμα φόρτωσης στατιστικών εγγραφών:', err);
+    }
 
-    this.http.get('http://localhost:5000/api/stats/registrations', { headers }).subscribe({
-      next: (data: any) => {
-        this.registrations.set(data);
-        this.renderRegChart();
-      },
-      error: (err) => console.error('Σφάλμα φόρτωσης στατιστικών εγγραφών:', err)
-    });
+    try {
+      const data = await this.homeService.getTasksCreated();
+      this.taskCreation.set(data);
+      this.renderTaskChart();
+    } catch (err) {
+      console.error('Σφάλμα φόρτωσης στατιστικών εργασιών:', err);
+    }
 
-    this.http.get('http://localhost:5000/api/stats/tasks-created', { headers }).subscribe({
-      next: (data: any) => {
-        this.taskCreation.set(data);
-        this.renderTaskChart();
-      },
-      error: (err) => console.error('Σφάλμα φόρτωσης στατιστικών εργασιών:', err)
-    });
-
-    this.http.get('http://localhost:5000/api/stats/recent-users', { headers }).subscribe({
-      next: (data: any) => this.recentUsers.set(data || []),
-      error: (err) => console.error('Σφάλμα φόρτωσης πρόσφατων χρηστών:', err)
-    });
+    try {
+      const data = await this.homeService.getRecentUsers();
+      this.recentUsers.set(data || []);
+    } catch (err) {
+      console.error('Σφάλμα φόρτωσης πρόσφατων χρηστών:', err);
+    }
   }
 
-  // Φιλικό σχετικό label εγγραφής (π.χ. "Σήμερα", "Χθες", "πριν 3 ημέρες")
   joinedAgo(createdAt: string): string {
     if (!createdAt) return '';
     const then = new Date(createdAt.replace(' ', 'T'));
@@ -192,28 +182,27 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return `πριν ${Math.floor(days / 30)} μήνα/ες`;
   }
 
-  // Εναλλαγή προβολής γραφήματος εγγραφών (Σωρευτικά / Ανά ημέρα)
+  // Εναλλαγή Σωρευτικά-Ανά ημέρα
   setChartMode(mode: 'cumulative' | 'daily') {
     if (this.chartMode() === mode) return;
     this.chartMode.set(mode);
     this.renderRegChart();
   }
 
-  // Εναλλαγή προβολής γραφήματος εργασιών (Ανά ημέρα / Ανά εβδομάδα)
+  // Εναλλαγή Ανά ημέρα-Ανά εβδομάδα
   setTaskChartMode(mode: 'daily' | 'weekly') {
     if (this.taskChartMode() === mode) return;
     this.taskChartMode.set(mode);
     this.renderTaskChart();
   }
 
-  // Μετατροπή 'YYYY-MM-DD' -> 'D/M' για τις ετικέτες του άξονα x
+  // Μετατροπή 'YYYY-MM-DD' σε 'D/M' για τις ετικέτες του άξονα x
   private formatLabel(isoDate: string): string {
     const [, m, d] = isoDate.split('-');
     return `${Number(d)}/${Number(m)}`;
   }
 
-  // Γεμίζει τα κενά: συνεχόμενο εύρος από την πρώτη μέρα έως σήμερα (με 0 στις κενές μέρες)
-  // και επιστρέφει τιμές ανά ημέρα / σωρευτικά / ανά εβδομάδα ανάλογα με το mode.
+  // συνεχόμενο εύρος από την πρώτη μέρα έως σήμερα (με 0 στις κενές μέρες)
   private buildSeries(daily: { date: string; count: number }[], mode: 'cumulative' | 'daily' | 'weekly'): { labels: string[]; data: number[] } {
     if (!daily || daily.length === 0) return { labels: [], data: [] };
 
@@ -223,7 +212,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     const end = new Date();
     end.setHours(0, 0, 0, 0);
 
-    // Όλες οι μέρες του εύρους (με 0 στις κενές)
+    // Όλες οι μέρες του εύρους
     const days: { iso: string; count: number }[] = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const iso = d.toISOString().slice(0, 10);
@@ -262,7 +251,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // Γενική δημιουργία γραφήματος (line ή bar) — κοινή για εγγραφές & εργασίες
+  // δημιουργία γραφήματος
   private createChart(canvas: HTMLCanvasElement, labels: string[], data: number[], label: string, color: string, kind: 'line' | 'bar' = 'line', barConfig: any = {}): Chart | undefined {
     const ctx = canvas.getContext('2d');
     if (!ctx) return undefined;
@@ -289,7 +278,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
         backgroundColor: gradient,
         borderWidth: 2.5,
         fill: true,
-        // Ομαλή καμπύλη ΧΩΡΙΣ υπερβολές (δεν ξεπερνά την κορυφή ούτε πέφτει κάτω από το 0)
+        // Ομαλή καμπύλη 
         cubicInterpolationMode: 'monotone',
         pointRadius: 3,
         pointBackgroundColor: '#fff',
@@ -322,7 +311,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
           },
           y: {
             beginAtZero: true,
-            grace: '12%', // λίγος "αέρας" πάνω από την κορυφή ώστε να μην κόβεται
+            grace: '12%', 
             grid: { color: '#f1f5f9' },
             ticks: { color: '#94a3b8', font: { size: 11 }, precision: 0 }
           }
@@ -332,8 +321,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private renderRegChart() {
-    if (!this.viewReady || !this.registrations() || !this.regCanvas) return;
-    const { labels, data } = this.buildSeries(this.registrations().daily, this.chartMode());
+    const registrations = this.registrations();
+    if (!this.viewReady || !registrations || !this.regCanvas) return;
+    const { labels, data } = this.buildSeries(registrations.daily, this.chartMode());
     if (this.regChart) this.regChart.destroy();
     this.regChart = this.createChart(
       this.regCanvas.nativeElement, labels, data,
@@ -343,12 +333,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private renderTaskChart() {
-    if (!this.viewReady || !this.taskCreation() || !this.taskCanvas) return;
+    const taskCreation = this.taskCreation();
+    if (!this.viewReady || !taskCreation || !this.taskCanvas) return;
     const weekly = this.taskChartMode() === 'weekly';
-    const { labels, data } = this.buildSeries(this.taskCreation().daily, this.taskChartMode());
+    const { labels, data } = this.buildSeries(taskCreation.daily, this.taskChartMode());
     if (this.taskChart) this.taskChart.destroy();
-    // Στο εβδομαδιαίο (λίγες μπάρες) τις θέλουμε χοντρές & κοντά -> γεμίζουν τον χώρο.
-    // Στο ημερήσιο (πολλές μπάρες) κρατάμε λεπτό όριο πάχους.
     const barConfig = weekly
       ? { categoryPercentage: 0.85, barPercentage: 0.85, maxBarThickness: 90 }
       : { maxBarThickness: 26 };
@@ -359,14 +348,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // Helper για τα αρχικά του χρήστη στο avatar
+  // για τα αρχικά του χρήστη στο avatar
   getInitials(firstName: string, lastName: string): string {
     const f = firstName?.[0] || '';
     const l = lastName?.[0] || '';
     return (f + l).toUpperCase() || '-';
   }
 
-  // Helper για το ποσοστό μιας bar
+  // για το ποσοστό μιας bar
   getBarWidth(count: number): number {
     const max = this.maxTaskCount();
     if (max === 0) return 0;

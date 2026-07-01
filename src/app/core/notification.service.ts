@@ -1,13 +1,14 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { io, Socket } from 'socket.io-client';
+import { API_BASE_URL } from '../shared/api.config';
 
 // Το σχήμα της ειδοποίησης (ίδιο από το HTTP fetch και από το socket event)
 export interface TaskNotification {
-  id: number;          // id της ειδοποίησης
-  taskId: number;      // id του task (για πλοήγηση)
+  id: number;          
+  taskId: number;      
   title: string;
-  userId: number;      // id του χρήστη που δημιούργησε το task
+  userId: number;      
   userName: string;
   createdAt: string;
   read: boolean;
@@ -17,13 +18,13 @@ export interface TaskNotification {
   providedIn: 'root'
 })
 export class NotificationService {
-  private baseUrl = 'http://localhost:5000';
+  private baseUrl = API_BASE_URL;
   private socket: Socket | null = null;
 
-  // Λίστα ειδοποιήσεων (νεότερη πρώτη)
+  // Λίστα ειδοποιήσεων 
   notifications = signal<TaskNotification[]>([]);
 
-  // Πλήθος μη αναγνωσμένων (για το κόκκινο badge)
+  // Πλήθος μη αναγνωσμένων 
   unreadCount = computed(() => this.notifications().filter(n => !n.read).length);
 
   constructor(private http: HttpClient) {}
@@ -69,7 +70,7 @@ export class NotificationService {
     this.notifications.set([]);
   }
 
-  // Μαρκάρει όλες ως αναγνωσμένες — τοπικά ΚΑΙ στη βάση (όταν κλείνει το dropdown)
+  // Μαρκάρει όλες ως αναγνωσμένες — τοπικά και στη βάση (όταν κλείνει το dropdown)
   markAllRead(): void {
     if (this.unreadCount() === 0) {
       return;
@@ -79,7 +80,7 @@ export class NotificationService {
       .subscribe({ next: () => {}, error: () => {} });
   }
 
-  // Καθαρισμός: διαγράφει όλες τις ειδοποιήσεις τοπικά ΚΑΙ στη βάση
+  // Καθαρισμός - διαγράφει όλες τις ειδοποιήσεις τοπικά και στη βάση
   clearAll(): void {
     this.notifications.set([]);
     this.http.delete(`${this.baseUrl}/api/notifications`, { headers: this.authHeaders() })

@@ -1,9 +1,8 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from './auth';
+import { AuthService } from './auth.service';
 
-// Προστατεύει τις σελίδες που απαιτούν σύνδεση. Αν δεν υπάρχει έγκυρο token
-// (λείπει ή έχει λήξει), δεν αφήνει τον χρήστη να μπει και τον στέλνει στο login.
+// Αν δεν υπάρχει έγκυρο token (λείπει ή έχει λήξει), δεν αφήνει τον χρήστη να μπει και τον στέλνει στο login.
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);

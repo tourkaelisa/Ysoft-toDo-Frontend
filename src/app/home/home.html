@@ -1,9 +1,8 @@
 <div class="dashboard-container">
 
-  <!-- ===== ADMIN DASHBOARD ===== -->
+  <!-- ADMIN VIEW -->
   <ng-container *ngIf="isAdmin; else userView">
 
-    <!-- HERO -->
     <div class="admin-hero">
       <div class="admin-hero-content">
         <h1>
@@ -28,17 +27,14 @@
         <mat-icon class="hero-bg-icon">analytics</mat-icon>
       </div>
 
-      <!-- Decorative blobs -->
       <div class="hero-blob blob-1"></div>
       <div class="hero-blob blob-2"></div>
     </div>
 
-    <!-- ERROR -->
     <div *ngIf="errorMessage()" class="dashboard-error">
       <mat-icon>error_outline</mat-icon> {{ errorMessage() }}
     </div>
 
-    <!-- KPI CARDS -->
     <div class="kpi-grid" *ngIf="stats() as s">
 
       <div class="kpi-card kpi-users">
@@ -288,10 +284,9 @@
 
   </ng-container>
 
-  <!-- ===== USER VIEW (μη admins) ===== -->
+  <!-- USER VIEW -->
   <ng-template #userView>
 
-    <!-- USER HERO -->
     <div class="user-hero">
       <div class="user-hero-content">
         <h1>
@@ -317,7 +312,7 @@
       <div class="hero-blob blob-2"></div>
     </div>
 
-    <!-- USER STATS ROW: 3 KPI cards + donut -->
+    <!-- USER STATS: 3 KPI cards + donut -->
     <div class="user-stats-row">
 
       <div class="kpi-card kpi-total user-kpi-tall">
@@ -356,7 +351,6 @@
         </div>
       </div>
 
-      <!-- DONUT ΩΣ 4η ΚΟΛΩΝΑ -->
       <div class="chart-card user-donut-col">
         <div class="donut-container user-donut-container">
           <div class="donut-chart"

@@ -33,7 +33,7 @@
         </div>
         
         <div class="filter-dropdown-body">
-          <div class="form-group filter-field">
+          <div class="form-group">
             <label>Από</label>
             <div class="date-wrapper">
               <input matInput [matDatepicker]="startPicker" [(ngModel)]="filterStartDate" placeholder="Επιλογή..." (focus)="startPicker.open()">
@@ -42,7 +42,7 @@
             </div>
           </div>
 
-          <div class="form-group filter-field">
+          <div class="form-group">
             <label>Έως</label>
             <div class="date-wrapper">
               <input matInput [matDatepicker]="endPicker" [(ngModel)]="filterEndDate" placeholder="Επιλογή..." (focus)="endPicker.open()">
@@ -117,7 +117,7 @@
     </div>
   </div>
 
-  <div class="modal-overlay" *ngIf="isModalOpen">
+  <div class="modal-overlay" *ngIf="isModalOpen()">
     <div class="modal-box form-card">
       <h2 class="form-title">{{ editingUserId ? 'Επεξεργασία Χρήστη' : 'Προσθήκη Χρήστη' }}</h2>
       
@@ -145,8 +145,8 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Κωδικός <span *ngIf="!editingUserId" class="required">*</span> <span style="font-size: 11px; font-weight: normal; color: #64748b;" *ngIf="editingUserId">(Αφήστε κενό για να μην αλλάξει)</span></label>
+      <div class="form-group" *ngIf="!editingUserId">
+        <label>Κωδικός <span class="required">*</span></label>
         <div class="password-wrapper">
           <input [type]="isPasswordVisible ? 'text' : 'password'" [(ngModel)]="formData.password" placeholder="Πληκτρολογήστε κωδικό..." (keyup.enter)="saveUser()">
           <button type="button" class="eye-btn" (click)="isPasswordVisible = !isPasswordVisible">
@@ -233,7 +233,6 @@
             Δεν υπάρχουν υπο-εργασίες.
           </div>
 
-          <!-- Συνημμένα αρχεία του task (read-only για τον admin: μόνο λήψη) -->
           <div class="task-files-section" *ngIf="task.files && task.files.length > 0">
             <div class="task-files-title">
               <mat-icon>attach_file</mat-icon>
@@ -254,15 +253,11 @@
             </ul>
           </div>
         </div>
-
       </div>
-
     </div>
   </div>
-
 </div>
 
-<!-- INFO / ALERT MODAL -->
 <div class="modal-overlay" *ngIf="isInfoModalOpen" (click)="closeInfo()">
   <div class="modal-box info-modal-box" (click)="$event.stopPropagation()">
     <div class="info-modal-icon">
@@ -275,8 +270,7 @@
   </div>
 </div>
 
-<!-- DELETE CONFIRMATION MODAL -->
-<div class="modal-overlay" *ngIf="isDeleteConfirmOpen" (click)="closeDeleteConfirm()">
+<div class="modal-overlay" *ngIf="isDeleteConfirmOpen()" (click)="closeDeleteConfirm()">
   <div class="modal-box del-confirm-box" (click)="$event.stopPropagation()">
     <div class="del-confirm-header">
       <div class="del-confirm-icon-wrap">
@@ -295,7 +289,7 @@
     </div>
   </div>
 </div>
-<!-- ROLE CHANGE WARNING MODAL (όταν ο admin αλλάζει τον ΔΙΚΟ του ρόλο σε user) -->
+
 <div class="modal-overlay" *ngIf="isRoleWarningOpen" (click)="cancelRoleChange()">
   <div class="modal-box del-confirm-box" (click)="$event.stopPropagation()">
     <div class="del-confirm-header">
@@ -315,7 +309,6 @@
   </div>
 </div>
 
-<!-- SELF-DEMOTE WARNING MODAL (γρήγορο toggle του ΔΙΚΟΥ μου ρόλου admin -> user) -->
 <div class="modal-overlay" *ngIf="isSelfDemoteOpen" (click)="cancelSelfDemote()">
   <div class="modal-box del-confirm-box" (click)="$event.stopPropagation()">
     <div class="del-confirm-header">
@@ -330,6 +323,31 @@
     <div class="del-confirm-footer">
       <button class="cancel-btn" (click)="cancelSelfDemote()">Ακύρωση</button>
       <button class="del-confirm-btn" (click)="confirmSelfDemote()">Ναι, συνέχεια</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="isRoleToggleConfirmOpen" (click)="cancelRoleToggle()">
+  <div class="modal-box del-confirm-box" (click)="$event.stopPropagation()">
+    <div class="del-confirm-header">
+      <div class="del-confirm-icon-wrap">
+        <mat-icon>{{ roleToggleTargetRole === 'admin' ? 'admin_panel_settings' : 'person' }}</mat-icon>
+      </div>
+      <h3 class="del-confirm-title">Αλλαγή ρόλου χρήστη</h3>
+    </div>
+    <p class="del-confirm-body" *ngIf="roleToggleTargetRole === 'admin'">
+      Πρόκειται να προαγάγετε τον χρήστη
+      <strong>{{ roleToggleUser?.first_name }} {{ roleToggleUser?.last_name }}</strong>
+      σε <strong>Admin</strong>. Θα αποκτήσει <strong>δικαιώματα διαχειριστή</strong>. Είστε σίγουροι;
+    </p>
+    <p class="del-confirm-body" *ngIf="roleToggleTargetRole === 'user'">
+      Πρόκειται να υποβιβάσετε τον χρήστη
+      <strong>{{ roleToggleUser?.first_name }} {{ roleToggleUser?.last_name }}</strong>
+      σε <strong>User</strong>. Θα <strong>χάσει τα δικαιώματα διαχειριστή</strong>. Είστε σίγουροι;
+    </p>
+    <div class="del-confirm-footer">
+      <button class="cancel-btn" (click)="cancelRoleToggle()">Ακύρωση</button>
+      <button class="del-confirm-btn" (click)="confirmRoleToggle()">Ναι, συνέχεια</button>
     </div>
   </div>
 </div>

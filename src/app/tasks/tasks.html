@@ -11,7 +11,7 @@
   </div>
 
   <!-- ΚΥΡΙΟ LAYOUT: ΛΙΣΤΑ ΑΡΙΣΤΕΡΑ + SIDE PANEL ΔΕΞΙΑ -->
-  <div class="tasks-split-layout" [class.has-selection]="selectedTask()">
+  <div class="tasks-split-layout">
 
     <!-- ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ: ΣΥΜΠΑΓΗΣ ΛΙΣΤΑ -->
     <div class="tasks-list-column">
@@ -170,7 +170,7 @@
     </div>
     <div class="modal-body">
       <input type="text" [(ngModel)]="editTitle" class="modal-input" placeholder="Νέος τίτλος..." (input)="editError.set('')" (keyup.enter)="saveEdit()">
-      <div *ngIf="editError()" class="alert error-alert modal-error-alert">
+      <div *ngIf="editError()" class="modal-error-alert">
         <mat-icon>error_outline</mat-icon>
         <span>{{ editError() }}</span>
       </div>

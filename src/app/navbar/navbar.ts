@@ -1,9 +1,9 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../auth';
+import { AuthService } from '../core/auth.service';
 import { MatIconModule } from '@angular/material/icon';
-import { NotificationService, TaskNotification } from '../notification.service';
+import { NotificationService, TaskNotification } from '../core/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -22,7 +22,7 @@ export class NavbarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Μόνο ο admin συνδέεται στο WebSocket για να λαμβάνει ειδοποιήσεις νέων tasks.
+    // Μόνο ο admin συνδέεται στο WebSocket για να λαμβάνει ειδοποιήσεις 
     if (this.isAdmin()) {
       this.notifications.connect();
     }
@@ -30,11 +30,10 @@ export class NavbarComponent implements OnInit {
 
   isAdmin(): boolean {
     const user = this.authService.getUserData();
-    const role = user?.role_name || user?.role;
-    return role === 'admin';
+    return user?.role_name === 'admin';
   }
 
-  // Ανοιγοκλείνει το dropdown με τις ειδοποιήσεις.
+  // dropdown με τις ειδοποιήσεις.
   toggleDropdown() {
     if (this.isDropdownOpen) {
       this.closeDropdown();
@@ -43,8 +42,7 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  // Κλείσιμο dropdown: ΤΟΤΕ μαρκάρουμε ως διαβασμένες (ώστε να προλάβεις
-  // να δεις ποιες ήταν αδιάβαστες όσο ήταν ανοιχτό).
+  // Κλείσιμο dropdown - μαρκάρουμε ως διαβασμένες 
   closeDropdown() {
     if (!this.isDropdownOpen) {
       return;
@@ -53,7 +51,6 @@ export class NavbarComponent implements OnInit {
     this.notifications.markAllRead();
   }
 
-  // Κλείσιμο όταν κάνεις κλικ οπουδήποτε αλλού στην οθόνη.
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -71,6 +68,8 @@ export class NavbarComponent implements OnInit {
   // Click σε ειδοποίηση -> πάμε στη σελίδα χρηστών και ανοίγουμε τα tasks του χρήστη.
   openNotification(n: TaskNotification) {
     this.isDropdownOpen = false;
+    // Μαρκάρουμε ως διαβασμένες 
+    this.notifications.markAllRead();
     this.router.navigate(['/users'], {
       queryParams: { openUser: n.userId, highlightTask: n.taskId }
     });

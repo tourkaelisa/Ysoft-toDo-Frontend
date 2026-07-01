@@ -1,9 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TaskService } from './task.service';
+import { Task, TaskItem, TaskFile } from './task.model';
 
 @Component({
   selector: 'app-tasks',
@@ -13,93 +14,93 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   styleUrl: './tasks.css'
 })
 export class TasksComponent implements OnInit {
-  tasks = signal<any[]>([]);
+  tasks = signal<Task[]>([]);
   errorMessage = signal('');
 
   newTaskTitle = '';
 
-  // ΝΕΟ: η επιλεγμένη εργασία που εμφανίζεται στο side panel
-  selectedTask = signal<any | null>(null);
+  selectedTask = signal<Task | null>(null);
 
-  constructor(private http: HttpClient) {}
+  constructor(private taskService: TaskService) {}
 
   ngOnInit() {
     this.loadTasks();
   }
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  async loadTasks() {
+    try {
+      const data = await this.taskService.getTasks();
+      const currentTasks = this.tasks();
+      const updatedTasks = data.map((newTask: Task) => {
+        const existingTask = currentTasks.find((t: Task) => t.id === newTask.id);
+
+        if (existingTask) {
+          newTask.items = existingTask.items;
+          newTask.newItemDescription = existingTask.newItemDescription;
+        }
+
+        return newTask;
+      });
+      this.tasks.set(this.sortTasks(updatedTasks));
+
+      // Φόρτωσε items για όλες τις εργασίες ώστε να φαίνεται ο αριθμός στη λίστα
+      updatedTasks.forEach((task: Task) => {
+        if (!task.items) {
+          this.loadTaskItems(task);
+        }
+      });
+
+      // Ενημέρωση του selectedTask αν υπάρχει
+      const currentSelected = this.selectedTask();
+      if (currentSelected) {
+        const refreshed = updatedTasks.find((t: Task) => t.id === currentSelected.id);
+        this.selectedTask.set(refreshed || null);
+      }
+    } catch (err: any) {
+      this.errorMessage.set(err.error?.message || 'Σφάλμα κατά τη φόρτωση των εργασιών.');
+    }
   }
 
-  loadTasks() {
-    this.http.get('http://localhost:5000/api/tasks', { headers: this.getHeaders() }).subscribe({
-      next: (data: any ) => {
-        const currentTasks = this.tasks();
-        const updatedTasks = data.map((newTask: any) => {
-          const existingTask = currentTasks.find((t: any) => t.id === newTask.id);
-
-          if (existingTask) {
-            newTask.items = existingTask.items;
-            newTask.newItemDescription = existingTask.newItemDescription;
-          }
-
-          return newTask;
-        });
-        this.tasks.set(updatedTasks);
-
-        // Φόρτωσε items για όλες τις εργασίες ώστε να φαίνεται ο αριθμός στη λίστα
-        updatedTasks.forEach((task: any) => {
-          if (!task.items) {
-            this.loadTaskItems(task);
-          }
-        });
-
-        // Ενημέρωση του selectedTask αν υπάρχει
-        const currentSelected = this.selectedTask();
-        if (currentSelected) {
-          const refreshed = updatedTasks.find((t: any) => t.id === currentSelected.id);
-          this.selectedTask.set(refreshed || null);
-        }
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Σφάλμα κατά τη φόρτωση των εργασιών.');
+  // Ταξινόμηση: πρώτα οι εκκρεμείς και μετά οι ολοκληρωμένες (τέρμα κάτω),
+  // και μέσα σε κάθε ομάδα τα πιο πρόσφατα (created_at) πάνω.
+  private sortTasks(tasks: Task[]): Task[] {
+    return [...tasks].sort((a, b) => {
+      const aCompleted = a.status === 'completed' ? 1 : 0;
+      const bCompleted = b.status === 'completed' ? 1 : 0;
+      if (aCompleted !== bCompleted) {
+        return aCompleted - bCompleted; // εκκρεμείς (0) πριν τις ολοκληρωμένες (1)
       }
+      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return bTime - aTime; // πιο πρόσφατα πάνω
     });
   }
 
-  addTask() {
+  async addTask() {
     if (!this.newTaskTitle.trim()) return;
 
-    const body = { title: this.newTaskTitle };
-
-    this.http.post('http://localhost:5000/api/tasks', body, { headers: this.getHeaders() }).subscribe({
-      next: () => {
-        this.newTaskTitle = '';
-        this.loadTasks();
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Αποτυχία προσθήκης εργασίας.');
-      }
-    });
+    try {
+      await this.taskService.createTask(this.newTaskTitle);
+      this.newTaskTitle = '';
+      this.loadTasks();
+    } catch (err: any) {
+      this.errorMessage.set(err.error?.message || 'Αποτυχία προσθήκης εργασίας.');
+    }
   }
 
-  toggleStatus(task: any, event?: Event) {
+  async toggleStatus(task: Task, event?: Event) {
     if (event) event.stopPropagation();
     const newStatus = task.status === 'completed' ? 'pending' : 'completed';
 
-    this.http.put(`http://localhost:5000/api/tasks/${task.id}/status`, { status: newStatus }, { headers: this.getHeaders() }).subscribe({
-      next: () => {
-        this.loadTasks();
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Σφάλμα κατά την ενημέρωση της κατάστασης.');
-      }
-    });
+    try {
+      await this.taskService.updateTaskStatus(task.id, newStatus);
+      this.loadTasks();
+    } catch (err: any) {
+      this.errorMessage.set(err.error?.message || 'Σφάλμα κατά την ενημέρωση της κατάστασης.');
+    }
   }
 
-  // ΝΕΟ: επιλογή task για εμφάνιση στο side panel
-  selectTask(task: any) {
+  selectTask(task: Task) {
     this.selectedTask.set(task);
     if (!task.items) {
       this.loadTaskItems(task);
@@ -109,50 +110,48 @@ export class TasksComponent implements OnInit {
     }
   }
 
-  // ΝΕΟ: κλείσιμο του side panel
   closeSidePanel() {
     this.selectedTask.set(null);
   }
 
-  loadTaskItems(task: any) {
-    this.http.get(`http://localhost:5000/api/tasks/${task.id}/items`, { headers: this.getHeaders() }).subscribe({
-      next: (items: any) => {
-        task.items = items;
-        this.tasks.update(tasks => [...tasks]);
-      },
-      error: () => this.errorMessage.set('Σφάλμα φόρτωσης υπο-εργασιών.')
-    });
+  // Task-Items 
+
+  async loadTaskItems(task: Task) {
+    try {
+      const items = await this.taskService.getTaskItems(task.id);
+      task.items = items;
+      this.tasks.update(tasks => [...tasks]);
+    } catch {
+      this.errorMessage.set('Σφάλμα φόρτωσης υπο-εργασιών.');
+    }
   }
 
-  addTaskItem(task: any) {
+  async addTaskItem(task: Task) {
     if (!task.newItemDescription?.trim()) return;
 
-    this.http.post(`http://localhost:5000/api/tasks/${task.id}/items`, { description: task.newItemDescription }, { headers: this.getHeaders() }).subscribe({
-      next: () => {
-        task.newItemDescription = '';
-        this.loadTaskItems(task);
-      },
-      error: (err) => this.errorMessage.set(err.error?.message || 'Σφάλμα προσθήκης item.')
-    });
+    try {
+      await this.taskService.addTaskItem(task.id, task.newItemDescription);
+      task.newItemDescription = '';
+      this.loadTaskItems(task);
+    } catch (err: any) {
+      this.errorMessage.set(err.error?.message || 'Σφάλμα προσθήκης item.');
+    }
   }
 
-  // =========================================================
-  //  ΑΡΧΕΙΑ (FILES) — upload / λίστα / download / διαγραφή
-  // =========================================================
+  // ΑΡΧΕΙΑ - upload / λίστα / download / διαγραφή
 
-  // Φόρτωση της λίστας αρχείων ενός task
-  loadTaskFiles(task: any) {
-    this.http.get(`http://localhost:5000/api/tasks/${task.id}/files`, { headers: this.getHeaders() }).subscribe({
-      next: (files: any) => {
-        task.files = files;
-        this.tasks.update(tasks => [...tasks]);
-      },
-      error: () => this.errorMessage.set('Σφάλμα φόρτωσης αρχείων.')
-    });
+  async loadTaskFiles(task: Task) {
+    try {
+      const files = await this.taskService.getTaskFiles(task.id);
+      task.files = files;
+      this.tasks.update(tasks => [...tasks]);
+    } catch {
+      this.errorMessage.set('Σφάλμα φόρτωσης αρχείων.');
+    }
   }
 
   // Ανέβασμα αρχείου από το <input type="file">
-  uploadFile(task: any, event: Event) {
+  async uploadFile(task: Task, event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -161,37 +160,31 @@ export class TasksComponent implements OnInit {
     formData.append('file', file);
 
     task.uploading = true;
-    // Σημ.: ΔΕΝ βάζουμε Content-Type — ο browser το ορίζει μόνος του (multipart boundary)
-    this.http.post(`http://localhost:5000/api/tasks/${task.id}/files`, formData, { headers: this.getHeaders() }).subscribe({
-      next: () => {
-        task.uploading = false;
-        input.value = ''; // καθάρισμα ώστε να μπορεί να ξαναεπιλεγεί το ίδιο αρχείο
-        this.loadTaskFiles(task);
-      },
-      error: (err) => {
-        task.uploading = false;
-        input.value = '';
-        this.errorMessage.set(err.error?.message || 'Αποτυχία ανεβάσματος αρχείου.');
-      }
-    });
+    try {
+      await this.taskService.uploadFile(task.id, formData);
+      task.uploading = false;
+      input.value = ''; // καθάρισμα ώστε να μπορεί να ξαναεπιλεγεί το ίδιο αρχείο
+      this.loadTaskFiles(task);
+    } catch (err: any) {
+      task.uploading = false;
+      input.value = '';
+      this.errorMessage.set(err.error?.message || 'Αποτυχία ανεβάσματος αρχείου.');
+    }
   }
 
   // Κατέβασμα αρχείου (binary -> blob -> τοπική λήψη)
-  downloadFile(file: any) {
-    this.http.get(`http://localhost:5000/api/files/${file.id}/download`, {
-      headers: this.getHeaders(),
-      responseType: 'blob'
-    }).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.original_name;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: () => this.errorMessage.set('Σφάλμα κατά τη λήψη του αρχείου.')
-    });
+  async downloadFile(file: TaskFile) {
+    try {
+      const blob = await this.taskService.downloadFile(file.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.original_name;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      this.errorMessage.set('Σφάλμα κατά τη λήψη του αρχείου.');
+    }
   }
 
   // Μετατροπή bytes σε αναγνώσιμο μέγεθος
@@ -215,47 +208,50 @@ export class TasksComponent implements OnInit {
     return 'insert_drive_file';
   }
 
-  // ΝΕΕΣ ΜΕΤΑΒΛΗΤΕΣ ΓΙΑ ΤΟ POP-UP ΔΙΑΓΡΑΦΗΣ
+  // Μεταβλητές για το pop up της διαγραφής
   isDeleteModalOpen = false;
   deleteTarget: 'task' | 'subtask' | 'file' | null = null;
-  itemToDelete: any = null;
-  parentTask: any = null;
+  itemToDelete: Task | TaskItem | TaskFile | null = null;
+  parentTask: Task | null = null;
 
-  openDeleteModal(item: any, target: 'task' | 'subtask' | 'file', parent?: any, event?: Event) {
+  openDeleteModal(item: Task | TaskItem | TaskFile, target: 'task' | 'subtask' | 'file', parent?: Task, event?: Event) {
     if (event) event.stopPropagation();
     this.deleteTarget = target;
     this.itemToDelete = item;
-    this.parentTask = parent;
+    this.parentTask = parent ?? null;
     this.isDeleteModalOpen = true;
   }
 
-  confirmDelete() {
+  async confirmDelete() {
+    if (!this.itemToDelete) return;
+    const itemId = this.itemToDelete.id;
+
     if (this.deleteTarget === 'task') {
-      this.http.delete(`http://localhost:5000/api/tasks/${this.itemToDelete.id}`, { headers: this.getHeaders() }).subscribe({
-        next: () => {
-          // Αν διαγραφεί το επιλεγμένο, κλείσε το panel
-          if (this.selectedTask()?.id === this.itemToDelete.id) {
-            this.selectedTask.set(null);
-          }
-          this.loadTasks();
-          this.closeDeleteModal();
+      try {
+        await this.taskService.deleteTask(itemId);
+        // Αν διαγραφεί το επιλεγμένο, κλείσε το panel
+        if (this.selectedTask()?.id === itemId) {
+          this.selectedTask.set(null);
         }
-      });
-    } else if (this.deleteTarget === 'subtask') {
-      this.http.delete(`http://localhost:5000/api/task-items/${this.itemToDelete.id}`, { headers: this.getHeaders() }).subscribe({
-        next: () => {
-          this.loadTaskItems(this.parentTask);
-          this.closeDeleteModal();
-        }
-      });
-    } else if (this.deleteTarget === 'file') {
-      this.http.delete(`http://localhost:5000/api/files/${this.itemToDelete.id}`, { headers: this.getHeaders() }).subscribe({
-        next: () => {
-          this.loadTaskFiles(this.parentTask);
-          this.closeDeleteModal();
-        },
-        error: (err) => this.errorMessage.set(err.error?.message || 'Αποτυχία διαγραφής αρχείου.')
-      });
+        this.loadTasks();
+        this.closeDeleteModal();
+      } catch {}
+    } else if (this.deleteTarget === 'subtask' && this.parentTask) {
+      const parent = this.parentTask;
+      try {
+        await this.taskService.deleteTaskItem(itemId);
+        this.loadTaskItems(parent);
+        this.closeDeleteModal();
+      } catch {}
+    } else if (this.deleteTarget === 'file' && this.parentTask) {
+      const parent = this.parentTask;
+      try {
+        await this.taskService.deleteFile(itemId);
+        this.loadTaskFiles(parent);
+        this.closeDeleteModal();
+      } catch (err: any) {
+        this.errorMessage.set(err.error?.message || 'Αποτυχία διαγραφής αρχείου.');
+      }
     }
   }
 
@@ -266,15 +262,15 @@ export class TasksComponent implements OnInit {
     this.parentTask = null;
   }
 
-  // ΝΕΕΣ ΜΕΤΑΒΛΗΤΕΣ ΓΙΑ ΤΟ POP-UP ΕΠΕΞΕΡΓΑΣΙΑΣ
+  // Μεταβλήτές για το pop up της επεξεργασίας 
   isEditModalOpen = false;
   editTarget: 'task' | 'subtask' | null = null;
-  taskBeingEdited: any = null;
-  subtaskBeingEdited: any = null;
+  taskBeingEdited: Task | null = null;
+  subtaskBeingEdited: TaskItem | null = null;
   editTitle = '';
   editError = signal('');
 
-  editTask(task: any, event?: Event) {
+  editTask(task: Task, event?: Event) {
     if (event) event.stopPropagation();
     this.editTarget = 'task';
     this.taskBeingEdited = task;
@@ -283,7 +279,7 @@ export class TasksComponent implements OnInit {
     this.isEditModalOpen = true;
   }
 
-  editTaskItem(item: any, task: any) {
+  editTaskItem(item: TaskItem, task: Task) {
     this.editTarget = 'subtask';
     this.taskBeingEdited = task;
     this.subtaskBeingEdited = item;
@@ -301,7 +297,7 @@ export class TasksComponent implements OnInit {
     this.editError.set('');
   }
 
-  saveEdit() {
+  async saveEdit() {
     if (!this.editTitle.trim()) {
       this.editError.set(
         this.editTarget === 'subtask'
@@ -312,27 +308,24 @@ export class TasksComponent implements OnInit {
     }
     this.editError.set('');
 
-    if (this.editTarget === 'task') {
-      this.http.put(`http://localhost:5000/api/tasks/${this.taskBeingEdited.id}`, { title: this.editTitle }, { headers: this.getHeaders() }).subscribe({
-        next: () => {
-          this.errorMessage.set('');
-          this.loadTasks();
-          this.closeEditModal();
-        },
-        error: (err) => {
-          this.errorMessage.set(err.error?.message || 'Αποτυχία ανανέωσης της εργασίας.');
-        }
-      });
-    } else if (this.editTarget === 'subtask') {
-      this.http.put(`http://localhost:5000/api/task-items/${this.subtaskBeingEdited.id}`, { description: this.editTitle }, { headers: this.getHeaders() }).subscribe({
-        next: () => {
-          this.loadTaskItems(this.taskBeingEdited);
-          this.closeEditModal();
-        },
-        error: (err) => {
-          this.errorMessage.set(err.error?.message || 'Αποτυχία ενημέρωσης.');
-        }
-      });
+    if (this.editTarget === 'task' && this.taskBeingEdited) {
+      try {
+        await this.taskService.updateTaskTitle(this.taskBeingEdited.id, this.editTitle);
+        this.errorMessage.set('');
+        this.loadTasks();
+        this.closeEditModal();
+      } catch (err: any) {
+        this.errorMessage.set(err.error?.message || 'Αποτυχία ανανέωσης της εργασίας.');
+      }
+    } else if (this.editTarget === 'subtask' && this.subtaskBeingEdited && this.taskBeingEdited) {
+      const parent = this.taskBeingEdited;
+      try {
+        await this.taskService.updateTaskItem(this.subtaskBeingEdited.id, this.editTitle);
+        this.loadTaskItems(parent);
+        this.closeEditModal();
+      } catch (err: any) {
+        this.errorMessage.set(err.error?.message || 'Αποτυχία ενημέρωσης.');
+      }
     }
   }
 

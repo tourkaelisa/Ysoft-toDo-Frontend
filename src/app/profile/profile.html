@@ -97,7 +97,6 @@
 
     </form>
 
-    <!-- ΔΙΑΚΡΙΤΙΚΟΣ ΣΥΝΔΕΣΜΟΣ ΔΙΑΓΡΑΦΗΣ -->
     <div class="delete-link-wrapper">
       <button type="button" class="delete-link" (click)="openDeleteModal()">
         <mat-icon>delete_outline</mat-icon> Διαγραφή λογαριασμού
@@ -108,8 +107,7 @@
 
 </div>
 
-<!-- MODAL ΕΠΙΒΕΒΑΙΩΣΗΣ ΔΙΑΓΡΑΦΗΣ -->
-<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+<div class="modal-overlay" *ngIf="showDeleteModal()" (click)="closeDeleteModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
 
     <div class="modal-icon">
@@ -143,12 +141,12 @@
     </div>
 
     <div class="modal-actions">
-      <button type="button" class="modal-cancel-btn" (click)="closeDeleteModal()" [disabled]="isDeleting">
+      <button type="button" class="modal-cancel-btn" (click)="closeDeleteModal()" [disabled]="isDeleting()">
         Ακύρωση
       </button>
-      <button type="button" class="modal-confirm-btn" (click)="onConfirmDelete()" [disabled]="isDeleting">
+      <button type="button" class="modal-confirm-btn" (click)="onConfirmDelete()" [disabled]="isDeleting()">
         <mat-icon>delete_forever</mat-icon>
-        {{ isDeleting ? 'Διαγραφή...' : 'Οριστική Διαγραφή' }}
+        {{ isDeleting() ? 'Διαγραφή...' : 'Οριστική Διαγραφή' }}
       </button>
     </div>
 

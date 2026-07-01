@@ -12,7 +12,7 @@
   animation: gradientBG 15s ease infinite;
 }
 
-/* Η νέα διάταξη: 2 στήλες (Flexbox) */
+/* 2 στήλες (Flexbox) */
 .landing-layout {
   display: flex;
   justify-content: space-between;
@@ -22,14 +22,14 @@
   gap: 80px;
 }
 
-/* ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ ------------------------- */
+/* ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ */
 .hero-text-section {
   flex: 1;
-  background: rgba(255, 255, 255, 0.95); /* Ημιδιαφανές λευκό */
+  background: rgba(255, 255, 255, 0.95); 
   padding: 70px 60px;
   border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-  border-top: 6px solid #3f51b5;
+  border-top: 6px solid var(--primary);
   animation: slideInLeft 1s ease-out forwards;
 }
 
@@ -42,7 +42,7 @@
 }
 
 .highlight {
-  color: #3f51b5; 
+  color: var(--primary); 
 }
 
 .landing-subtitle {
@@ -58,12 +58,12 @@
 }
 
 .btn { padding: 16px 32px; font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; transition: all 0.2s ease; cursor: pointer; display: inline-block; }
-.btn-primary { background-color: #3f51b5; color: white; border: none; }
-.btn-primary:hover { background-color: #303f9f; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-.btn-outline { background-color: transparent; color: #3f51b5; border: 2px solid #3f51b5; }
+.btn-primary { background-color: var(--primary); color: white; border: none; }
+.btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); }
 .btn-outline:hover { background-color: rgba(63, 81, 181, 0.1); transform: translateY(-3px); }
 
-/* ΔΕΞΙΑ ΣΤΗΛΗ ------------------------- */
+/* ΔΕΞΙΑ ΣΤΗΛΗ */
 .hero-features-section {
   flex: 1;
   display: flex;
@@ -83,13 +83,13 @@
   transform: translateX(50px);
 }
 
-.feature-card h3 { margin: 0 0 8px 0; color: #3f51b5; font-size: 24px; }
+.feature-card h3 { margin: 0 0 8px 0; color: var(--primary); font-size: 24px; }
 .feature-card p { margin: 0; color: #666; font-size: 16px; }
 
 /* Ο κύκλος γύρω από τα εικονίδια */
 .icon-circle {
   background-color: #e8eaf6;
-  color: #3f51b5;
+  color: var(--primary);
   width: 70px;
   height: 70px;
   border-radius: 50%;
@@ -103,26 +103,9 @@
 .card-2 { animation: slideInRight 0.6s ease-out 0.6s forwards; }
 .card-3 { animation: slideInRight 0.6s ease-out 0.9s forwards; }
 
-/* ----------------------------------------------------------- */
-/* ANIMATIONS (Keyframes)                                      */
-/* ----------------------------------------------------------- */
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+/* Τα animations gradientBG / slideInLeft / slideInRight είναι global στο styles.css */
 
-@keyframes slideInLeft {
-  0% { opacity: 0; transform: translateX(-50px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slideInRight {
-  0% { opacity: 0; transform: translateX(50px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-
-/* Για μικρές οθόνες (Κινητά) τα βάζουμε το ένα κάτω από το άλλο */
+/* responsive (τα βάζουμε το ένα κάτω από το άλλο) */
 @media (max-width: 900px) {
   .landing-layout { flex-direction: column; }
   .hero-text-section, .hero-features-section { width: 100%; }

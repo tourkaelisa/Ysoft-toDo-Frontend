@@ -2,9 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AuthService } from '../auth';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../core/auth.service';
 import { MatIconModule } from '@angular/material/icon';
-import { isValidPassword, PASSWORD_MIN_LENGTH } from '../validators';
+import { isValidPassword, PASSWORD_MIN_LENGTH } from '../shared/validators';
+import { ApiMessage } from '../shared/api.model';
 
 @Component({
   selector: 'app-reset-password',
@@ -36,7 +38,6 @@ export class ResetPasswordComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Το token έρχεται από τον σύνδεσμο του email: /reset-password?token=...
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
 
     if (!this.token) {
@@ -44,7 +45,7 @@ export class ResetPasswordComponent implements OnInit {
     }
   }
 
-  onSubmit() {
+  async onSubmit() {
     this.errorMessage.set('');
     this.successMessage.set('');
 
@@ -65,20 +66,18 @@ export class ResetPasswordComponent implements OnInit {
 
     this.isLoading.set(true);
 
-    this.authService.resetPassword(this.token, this.newPassword).subscribe({
-      next: (response: any) => {
-        this.isLoading.set(false);
-        this.isDone.set(true);
-        this.successMessage.set(response?.message || 'Ο κωδικός άλλαξε επιτυχώς.');
-        // Αυτόματη ανακατεύθυνση στη σύνδεση μετά από λίγο
-        setTimeout(() => this.router.navigate(['/login']), 2500);
-      },
-      error: (err: any) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(
-          err.error?.message || 'Ο σύνδεσμος επαναφοράς δεν είναι έγκυρος ή έχει λήξει.'
-        );
-      }
-    });
+    try {
+      const response: ApiMessage = await this.authService.resetPassword(this.token, this.newPassword);
+      this.isLoading.set(false);
+      this.isDone.set(true);
+      this.successMessage.set(response?.message || 'Ο κωδικός άλλαξε επιτυχώς.');
+      // Αυτόματη ανακατεύθυνση στη σύνδεση μετά από λίγο
+      setTimeout(() => this.router.navigate(['/login']), 2500);
+    } catch (err) {
+      this.isLoading.set(false);
+      this.errorMessage.set(
+        (err as HttpErrorResponse).error?.message || 'Ο σύνδεσσμος επαναφοράς δεν είναι έγκυρος ή έχει λήξει.'
+      );
+    }
   }
 }

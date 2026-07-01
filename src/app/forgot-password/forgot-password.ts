@@ -2,9 +2,11 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../auth';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../core/auth.service';
 import { MatIconModule } from '@angular/material/icon';
-import { isValidEmail } from '../validators';
+import { isValidEmail } from '../shared/validators';
+import { ApiMessage } from '../shared/api.model';
 
 @Component({
   selector: 'app-forgot-password',
@@ -22,7 +24,7 @@ export class ForgotPasswordComponent {
 
   constructor(private authService: AuthService) {}
 
-  onSubmit() {
+  async onSubmit() {
     this.errorMessage.set('');
     this.successMessage.set('');
 
@@ -33,18 +35,15 @@ export class ForgotPasswordComponent {
 
     this.isLoading.set(true);
 
-    this.authService.forgotPassword(this.email.trim()).subscribe({
-      next: (response: any) => {
-        this.isLoading.set(false);
-        // Το backend απαντά πάντα γενικά (για λόγους ασφαλείας δεν αποκαλύπτει αν υπάρχει το email)
-        this.successMessage.set(
-          response?.message || 'Αν το email υπάρχει, στάλθηκε σύνδεσμος επαναφοράς.'
-        );
-      },
-      error: (err: any) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.');
-      }
-    });
+    try {
+      const response: ApiMessage = await this.authService.forgotPassword(this.email.trim());
+      this.isLoading.set(false);
+      this.successMessage.set(
+        response?.message || 'Αν το email υπάρχει, στάλθηκε σύνδεσμος επαναφοράς.'
+      );
+    } catch (err) {
+      this.isLoading.set(false);
+      this.errorMessage.set((err as HttpErrorResponse).error?.message || 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.');
+    }
   }
 }
