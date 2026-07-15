@@ -26,12 +26,13 @@ export class LoginComponent {
   ) {}
 
   async onLogin() {
+    this.errorMessage.set('');
+
     try {
       const response: AuthResponse = await this.authService.login(this.credentials.email, this.credentials.password);
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
 
-      this.errorMessage.set('');
       this.router.navigate(['/home']);
     } catch (err) {
       const message = (err as HttpErrorResponse).error?.message || 'Λάθος email ή κωδικός πρόσβασης.';
