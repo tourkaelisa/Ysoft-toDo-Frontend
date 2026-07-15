@@ -240,12 +240,15 @@
               <span class="files-count-badge">{{ task.files.length }}</span>
             </div>
             <ul class="task-files-list">
-              <li *ngFor="let file of task.files" class="task-file-row" (click)="downloadFile(file, $event)" title="Λήψη αρχείου">
+              <li *ngFor="let file of task.files" class="task-file-row" (click)="openPreview(file, $event)" title="Προβολή αρχείου">
                 <mat-icon class="file-type-icon">{{ getFileIcon(file.mime_type) }}</mat-icon>
                 <div class="task-file-info">
                   <span class="task-file-name">{{ file.original_name }}</span>
                   <span class="task-file-size">{{ formatFileSize(file.size) }}</span>
                 </div>
+                <button type="button" class="file-download-btn" (click)="openPreview(file, $event)" title="Προβολή">
+                  <mat-icon>visibility</mat-icon>
+                </button>
                 <button type="button" class="file-download-btn" (click)="downloadFile(file, $event)" title="Λήψη">
                   <mat-icon>download</mat-icon>
                 </button>
@@ -254,6 +257,58 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ΠΡΟΒΟΛΗΣ ΑΡΧΕΙΟΥ -->
+<div class="modal-overlay" *ngIf="isPreviewModalOpen()" (click)="closePreview()">
+  <div class="modal-card preview-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="preview-title">
+        <mat-icon>{{ getFileIcon(previewFile()?.mime_type || '') }}</mat-icon>
+        <span>{{ previewFile()?.original_name }}</span>
+      </h3>
+      <div class="preview-header-actions">
+        <button type="button" class="preview-download-btn" (click)="downloadPreviewFile()" title="Λήψη">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button class="close-modal-btn" (click)="closePreview()"><mat-icon>close</mat-icon></button>
+      </div>
+    </div>
+
+    <div class="preview-body">
+      <!-- Φόρτωση -->
+      <div *ngIf="previewLoading()" class="preview-loading">
+        <mat-spinner diameter="42"></mat-spinner>
+        <p>Φόρτωση προεπισκόπησης...</p>
+      </div>
+
+      <ng-container *ngIf="!previewLoading()">
+        <!-- Εικόνα -->
+        <img *ngIf="previewKind() === 'image' && previewUrl()" [src]="previewUrl()" class="preview-image" [alt]="previewFile()?.original_name">
+
+        <!-- PDF -->
+        <iframe *ngIf="previewKind() === 'pdf' && previewUrl()" [src]="previewUrl()" class="preview-frame" title="Προεπισκόπηση αρχείου"></iframe>
+
+        <!-- Κείμενο -->
+        <pre *ngIf="previewKind() === 'text' && previewText() !== null" class="preview-text">{{ previewText() }}</pre>
+
+        <!-- Βίντεο -->
+        <video *ngIf="previewKind() === 'video' && previewUrl()" [src]="previewUrl()" class="preview-video" controls></video>
+
+        <!-- Ήχος -->
+        <audio *ngIf="previewKind() === 'audio' && previewUrl()" [src]="previewUrl()" class="preview-audio" controls></audio>
+
+        <!-- Μη υποστηριζόμενος τύπος -->
+        <div *ngIf="previewKind() === 'none'" class="preview-unsupported">
+          <mat-icon>visibility_off</mat-icon>
+          <p>Δεν είναι δυνατή η προεπισκόπηση αυτού του τύπου αρχείου.</p>
+          <button type="button" class="modal-save-btn" (click)="downloadPreviewFile()">
+            <mat-icon>download</mat-icon> Λήψη αρχείου
+          </button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>

@@ -252,7 +252,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   // δημιουργία γραφήματος
-  private createChart(canvas: HTMLCanvasElement, labels: string[], data: number[], label: string, color: string, kind: 'line' | 'bar' = 'line', barConfig: any = {}): Chart | undefined {
+  private createChart(canvas: HTMLCanvasElement, labels: string[], data: number[], label: string, color: string, kind: 'line' | 'bar' = 'line', barConfig: any = {}, smooth: boolean = true): Chart | undefined {
     const ctx = canvas.getContext('2d');
     if (!ctx) return undefined;
 
@@ -278,8 +278,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
         backgroundColor: gradient,
         borderWidth: 2.5,
         fill: true,
-        // Ομαλή καμπύλη 
-        cubicInterpolationMode: 'monotone',
+        // smooth=true -> ομαλή καμπύλη, smooth=false -> ίσιες γραμμές
+        ...(smooth ? { cubicInterpolationMode: 'monotone' } : { tension: 0 }),
         pointRadius: 3,
         pointBackgroundColor: '#fff',
         pointBorderColor: color,
@@ -328,7 +328,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.regChart = this.createChart(
       this.regCanvas.nativeElement, labels, data,
       this.chartMode() === 'cumulative' ? 'Σύνολο χρηστών' : 'Εγγραφές',
-      '#3f51b5'
+      '#3f51b5', 'line', {},
+      this.chartMode() === 'daily' // καμπύλο μόνο στο "Ανά ημέρα", ίσιο στα "Σωρευτικά"
     );
   }
 

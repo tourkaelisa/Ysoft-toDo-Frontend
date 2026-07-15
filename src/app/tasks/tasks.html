@@ -129,7 +129,7 @@
             <mat-icon>info_outline</mat-icon> Δεν υπάρχουν συνημμένα αρχεία ακόμα.
           </li>
           <li *ngFor="let file of task.files" class="file-item-row">
-            <div class="file-content" (click)="downloadFile(file)" title="Λήψη αρχείου">
+            <div class="file-content" (click)="openPreview(file)" title="Προβολή αρχείου">
               <mat-icon class="file-type-icon">{{ getFileIcon(file.mime_type) }}</mat-icon>
               <div class="file-info">
                 <span class="file-name">{{ file.original_name }}</span>
@@ -137,6 +137,7 @@
               </div>
             </div>
             <div class="file-actions">
+              <button type="button" class="sub-action-btn" (click)="openPreview(file)" title="Προβολή"><mat-icon>visibility</mat-icon></button>
               <button type="button" class="sub-action-btn" (click)="downloadFile(file)" title="Λήψη"><mat-icon>download</mat-icon></button>
               <button type="button" class="sub-action-btn sub-delete" (click)="openDeleteModal(file, 'file', task)" title="Διαγραφή"><mat-icon>delete</mat-icon></button>
             </div>
@@ -191,6 +192,58 @@
     <div class="modal-footer">
       <button class="modal-cancel-btn" (click)="closeDeleteModal()">Ακύρωση</button>
       <button class="modal-delete-btn" (click)="confirmDelete()">Διαγραφή</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ΠΡΟΒΟΛΗΣ ΑΡΧΕΙΟΥ -->
+<div class="modal-overlay" *ngIf="isPreviewModalOpen()" (click)="closePreview()">
+  <div class="modal-card preview-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="preview-title">
+        <mat-icon>{{ getFileIcon(previewFile()?.mime_type || '') }}</mat-icon>
+        <span>{{ previewFile()?.original_name }}</span>
+      </h3>
+      <div class="preview-header-actions">
+        <button type="button" class="preview-download-btn" (click)="downloadPreviewFile()" title="Λήψη">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button class="close-modal-btn" (click)="closePreview()"><mat-icon>close</mat-icon></button>
+      </div>
+    </div>
+
+    <div class="preview-body">
+      <!-- Φόρτωση -->
+      <div *ngIf="previewLoading()" class="preview-loading">
+        <mat-spinner diameter="42"></mat-spinner>
+        <p>Φόρτωση προεπισκόπησης...</p>
+      </div>
+
+      <ng-container *ngIf="!previewLoading()">
+        <!-- Εικόνα -->
+        <img *ngIf="previewKind() === 'image' && previewUrl()" [src]="previewUrl()" class="preview-image" [alt]="previewFile()?.original_name">
+
+        <!-- PDF -->
+        <iframe *ngIf="previewKind() === 'pdf' && previewUrl()" [src]="previewUrl()" class="preview-frame" title="Προεπισκόπηση αρχείου"></iframe>
+
+        <!-- Κείμενο -->
+        <pre *ngIf="previewKind() === 'text' && previewText() !== null" class="preview-text">{{ previewText() }}</pre>
+
+        <!-- Βίντεο -->
+        <video *ngIf="previewKind() === 'video' && previewUrl()" [src]="previewUrl()" class="preview-video" controls></video>
+
+        <!-- Ήχος -->
+        <audio *ngIf="previewKind() === 'audio' && previewUrl()" [src]="previewUrl()" class="preview-audio" controls></audio>
+
+        <!-- Μη υποστηριζόμενος τύπος -->
+        <div *ngIf="previewKind() === 'none'" class="preview-unsupported">
+          <mat-icon>visibility_off</mat-icon>
+          <p>Δεν είναι δυνατή η προεπισκόπηση αυτού του τύπου αρχείου.</p>
+          <button type="button" class="modal-save-btn" (click)="downloadPreviewFile()">
+            <mat-icon>download</mat-icon> Λήψη αρχείου
+          </button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>

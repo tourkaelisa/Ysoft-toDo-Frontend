@@ -1096,3 +1096,181 @@
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* MODAL ΠΡΟΒΟΛΗΣ ΑΡΧΕΙΟΥ — ίδιο στυλ με τη σελίδα "Εργασίες" */
+
+.modal-card {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.modal-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--navy);
+  font-size: 20px;
+  margin: 0;
+}
+
+.modal-header mat-icon { color: var(--primary); }
+
+.close-modal-btn {
+  background: none; border: none; cursor: pointer; color: #94a3b8;
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px; border-radius: 50%; transition: all 0.2s;
+}
+
+.close-modal-btn:hover { background: #f1f5f9; color: var(--accent); }
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.preview-card {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  padding: 22px;
+}
+
+.preview-title {
+  min-width: 0; /* επιτρέπει το text-overflow μέσα στο flex */
+}
+
+.preview-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.preview-download-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.preview-download-btn:hover { background: #eef1fb; }
+
+.preview-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.preview-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: #64748b;
+  padding: 40px 0;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.preview-frame {
+  width: 100%;
+  height: 72vh;
+  border: none;
+  border-radius: 8px;
+  background: white;
+}
+
+.preview-video {
+  max-width: 100%;
+  max-height: 72vh;
+  border-radius: 8px;
+}
+
+.preview-audio {
+  width: 100%;
+}
+
+.preview-text {
+  width: 100%;
+  max-height: 72vh;
+  overflow: auto;
+  margin: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  background: white;
+  border-radius: 8px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1e293b;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  align-self: stretch;
+}
+
+.preview-unsupported {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: #64748b;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.preview-unsupported mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #cbd5e1;
+}
+
+.modal-save-btn {
+  padding: 0 20px; height: 44px; background: var(--primary); color: white;
+  border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.25);
+}
+
+.modal-save-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }

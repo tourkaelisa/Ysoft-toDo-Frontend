@@ -1,10 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeUrl, SafeResourceUrl } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TaskService } from './task.service';
 import { Task, TaskItem, TaskFile } from './task.model';
+
+type PreviewKind = 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'none';
 
 @Component({
   selector: 'app-tasks',
@@ -21,7 +24,7 @@ export class TasksComponent implements OnInit {
 
   selectedTask = signal<Task | null>(null);
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService, private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
     this.loadTasks();
@@ -36,6 +39,7 @@ export class TasksComponent implements OnInit {
 
         if (existingTask) {
           newTask.items = existingTask.items;
+          newTask.files = existingTask.files;
           newTask.newItemDescription = existingTask.newItemDescription;
         }
 
@@ -185,6 +189,90 @@ export class TasksComponent implements OnInit {
     } catch {
       this.errorMessage.set('Σφάλμα κατά τη λήψη του αρχείου.');
     }
+  }
+
+  // ΠΡΟΒΟΛΗ ΑΡΧΕΙΟΥ ΣΕ MODAL
+
+  // Signals: η εφαρμογή είναι zoneless, οπότε updates μετά από await
+  // πρέπει να γίνονται σε signals για να ανανεωθεί η προβολή.
+  isPreviewModalOpen = signal(false);
+  previewFile = signal<TaskFile | null>(null);
+  previewKind = signal<PreviewKind>('none');
+  // img/video/audio θέλουν SafeUrl (URL context), το iframe (pdf) θέλει SafeResourceUrl
+  previewUrl = signal<SafeUrl | SafeResourceUrl | null>(null);
+  previewText = signal<string | null>(null); // περιεχόμενο για αρχεία κειμένου
+  previewLoading = signal(false);
+  private previewRawUrl: string | null = null; // για revoke + άμεσο download
+
+  // Καθορίζει τι είδους προεπισκόπηση υποστηρίζει ο τύπος αρχείου
+  getPreviewKind(mimeType: string): PreviewKind {
+    if (!mimeType) return 'none';
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType === 'application/pdf') return 'pdf';
+    if (mimeType.startsWith('video/')) return 'video';
+    if (mimeType.startsWith('audio/')) return 'audio';
+    if (mimeType.startsWith('text/')) return 'text';
+    return 'none';
+  }
+
+  // Άνοιγμα του modal και φόρτωση του αρχείου ως blob για προβολή inline
+  async openPreview(file: TaskFile) {
+    const kind = this.getPreviewKind(file.mime_type);
+    this.previewFile.set(file);
+    this.previewKind.set(kind);
+    this.previewUrl.set(null);
+    this.previewText.set(null);
+    this.previewRawUrl = null;
+    this.isPreviewModalOpen.set(true);
+
+    // Μη προβλέψιμοι τύποι: δείχνουμε μήνυμα + κουμπί λήψης, χωρίς φόρτωση
+    if (kind === 'none') return;
+
+    this.previewLoading.set(true);
+    try {
+      const blob = await this.taskService.downloadFile(file.id);
+
+      if (kind === 'text') {
+        // Το κείμενο το διαβάζουμε και το δείχνουμε σε <pre> — το iframe
+        // θα κατέβαζε τύπους που δεν αποδίδονται inline (π.χ. text/x-python).
+        this.previewText.set(await blob.text());
+      } else {
+        // Εξασφαλίζουμε σωστό MIME type ώστε ο browser να αποδώσει σωστά το blob
+        const typedBlob = blob.type ? blob : new Blob([blob], { type: file.mime_type });
+        const rawUrl = window.URL.createObjectURL(typedBlob);
+        this.previewRawUrl = rawUrl;
+        // Το iframe (pdf) χρειάζεται resource URL, τα υπόλοιπα απλό safe URL
+        this.previewUrl.set(
+          kind === 'pdf'
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(rawUrl)
+            : this.sanitizer.bypassSecurityTrustUrl(rawUrl)
+        );
+      }
+    } catch {
+      this.errorMessage.set('Σφάλμα κατά την προβολή του αρχείου.');
+      this.closePreview();
+    } finally {
+      this.previewLoading.set(false);
+    }
+  }
+
+  // Λήψη του αρχείου που προβάλλεται αυτή τη στιγμή
+  downloadPreviewFile() {
+    const file = this.previewFile();
+    if (file) this.downloadFile(file);
+  }
+
+  closePreview() {
+    if (this.previewRawUrl) {
+      window.URL.revokeObjectURL(this.previewRawUrl);
+      this.previewRawUrl = null;
+    }
+    this.isPreviewModalOpen.set(false);
+    this.previewFile.set(null);
+    this.previewKind.set('none');
+    this.previewUrl.set(null);
+    this.previewText.set(null);
+    this.previewLoading.set(false);
   }
 
   // Μετατροπή bytes σε αναγνώσιμο μέγεθος

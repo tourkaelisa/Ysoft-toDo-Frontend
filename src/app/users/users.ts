@@ -1,7 +1,9 @@
 import { Component, OnInit, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { DomSanitizer, SafeUrl, SafeResourceUrl } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -13,10 +15,12 @@ import { UserService } from './user.service';
 import { User, UserFormData, UserUpdateResponse } from './user.model';
 import { Task, TaskFile } from '../tasks/task.model';
 
+type PreviewKind = 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'none';
+
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule, MatDatepickerModule, MatNativeDateModule, MatInputModule],
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, FormsModule, MatDatepickerModule, MatNativeDateModule, MatInputModule],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'el-GR' },
     { provide: DateAdapter, useClass: CustomDateAdapter },
@@ -108,7 +112,8 @@ export class UsersComponent implements OnInit {
   constructor(
     private userService: UserService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -467,8 +472,8 @@ export class UsersComponent implements OnInit {
   }
 
   // Κατέβασμα αρχείου ενός task του χρήστη (binary -> blob -> τοπική λήψη).
-  async downloadFile(file: TaskFile, event: Event) {
-    event.stopPropagation();
+  async downloadFile(file: TaskFile, event?: Event) {
+    if (event) event.stopPropagation();
 
     try {
       const blob = await this.userService.downloadFile(file.id);
@@ -481,6 +486,90 @@ export class UsersComponent implements OnInit {
     } catch {
       this.showInfo('Σφάλμα κατά τη λήψη του αρχείου.');
     }
+  }
+
+  // ΠΡΟΒΟΛΗ ΑΡΧΕΙΟΥ ΣΕ MODAL (ίδια λειτουργία με τη σελίδα των tasks)
+
+  isPreviewModalOpen = signal(false);
+  previewFile = signal<TaskFile | null>(null);
+  previewKind = signal<PreviewKind>('none');
+  // img/video/audio θέλουν SafeUrl (URL context), το iframe (pdf) θέλει SafeResourceUrl
+  previewUrl = signal<SafeUrl | SafeResourceUrl | null>(null);
+  previewText = signal<string | null>(null); // περιεχόμενο για αρχεία κειμένου
+  previewLoading = signal(false);
+  private previewRawUrl: string | null = null; // για revoke + άμεσο download
+
+  // Καθορίζει τι είδους προεπισκόπηση υποστηρίζει ο τύπος αρχείου
+  getPreviewKind(mimeType: string): PreviewKind {
+    if (!mimeType) return 'none';
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType === 'application/pdf') return 'pdf';
+    if (mimeType.startsWith('video/')) return 'video';
+    if (mimeType.startsWith('audio/')) return 'audio';
+    if (mimeType.startsWith('text/')) return 'text';
+    return 'none';
+  }
+
+  // Άνοιγμα του modal και φόρτωση του αρχείου ως blob για προβολή inline
+  async openPreview(file: TaskFile, event?: Event) {
+    if (event) event.stopPropagation();
+
+    const kind = this.getPreviewKind(file.mime_type);
+    this.previewFile.set(file);
+    this.previewKind.set(kind);
+    this.previewUrl.set(null);
+    this.previewText.set(null);
+    this.previewRawUrl = null;
+    this.isPreviewModalOpen.set(true);
+
+    // Μη προβλέψιμοι τύποι: δείχνουμε μήνυμα + κουμπί λήψης, χωρίς φόρτωση
+    if (kind === 'none') return;
+
+    this.previewLoading.set(true);
+    try {
+      const blob = await this.userService.downloadFile(file.id);
+
+      if (kind === 'text') {
+        // Το κείμενο το διαβάζουμε και το δείχνουμε σε <pre> — το iframe
+        // θα κατέβαζε τύπους που δεν αποδίδονται inline (π.χ. text/x-python).
+        this.previewText.set(await blob.text());
+      } else {
+        // Εξασφαλίζουμε σωστό MIME type ώστε ο browser να αποδώσει σωστά το blob
+        const typedBlob = blob.type ? blob : new Blob([blob], { type: file.mime_type });
+        const rawUrl = window.URL.createObjectURL(typedBlob);
+        this.previewRawUrl = rawUrl;
+        // Το iframe (pdf) χρειάζεται resource URL, τα υπόλοιπα απλό safe URL
+        this.previewUrl.set(
+          kind === 'pdf'
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(rawUrl)
+            : this.sanitizer.bypassSecurityTrustUrl(rawUrl)
+        );
+      }
+    } catch {
+      this.showInfo('Σφάλμα κατά την προβολή του αρχείου.');
+      this.closePreview();
+    } finally {
+      this.previewLoading.set(false);
+    }
+  }
+
+  // Λήψη του αρχείου που προβάλλεται αυτή τη στιγμή
+  downloadPreviewFile() {
+    const file = this.previewFile();
+    if (file) this.downloadFile(file);
+  }
+
+  closePreview() {
+    if (this.previewRawUrl) {
+      window.URL.revokeObjectURL(this.previewRawUrl);
+      this.previewRawUrl = null;
+    }
+    this.isPreviewModalOpen.set(false);
+    this.previewFile.set(null);
+    this.previewKind.set('none');
+    this.previewUrl.set(null);
+    this.previewText.set(null);
+    this.previewLoading.set(false);
   }
 
   // Μετατροπή bytes σε αναγνώσιμο μέγεθος
